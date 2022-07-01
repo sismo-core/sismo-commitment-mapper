@@ -1,0 +1,9 @@
+.build
+coverage/
+node_modules/
+.terraform/
+.serverless
+cache
+lib
+types
+log_analyze.zip

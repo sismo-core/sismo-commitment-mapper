@@ -1,0 +1,153 @@
+service: sismo-commitment-mapper
+frameworkVersion: "3"
+
+custom:
+  profiles:
+    dev: staging-common
+    prod-v1: prod-commitment-mapper-v1
+  commitmentMapperDynamoDB:
+    dev:
+      tableNameSuffix: staging
+      region: eu-west-1
+      role: arn:aws:iam::091325440235:role/commitment-store-dynamodb
+    prod-v1:
+      tableNameSuffix: prod
+      region: eu-west-1
+      role: arn:aws:iam::734017092764:role/commitment-store-dynamodb
+
+provider:
+  name: aws
+  runtime: nodejs14.x
+  profile: ${self:custom.profiles.${sls:stage}}
+  region: eu-west-1
+  memorySize: 2048
+  timeout: 20 # optional, in seconds, default is 6
+  environment:
+    COMMITMENT_STORE_TABLE_SUFFIX: ${self:custom.commitmentMapperDynamoDB.${sls:stage}.tableNameSuffix}
+    COMMITMENT_STORE_REGION: ${self:custom.commitmentMapperDynamoDB.${sls:stage}.region}
+    COMMITMENT_STORE_ROLE_ARN: ${self:custom.commitmentMapperDynamoDB.${sls:stage}.role}
+  httpApi:
+    cors: true
+
+functions:
+  commit:
+    handler: src/handler.commitEddsa
+    provisionedConcurrency: 1
+    reservedConcurrency: 10
+    disableLogs: true
+    events:
+      - httpApi:
+          path: /commit-eddsa
+          method: POST
+    role: commitmentMapperRole
+
+  sismoAddressCommitment:
+    handler: src/handler.sismoAddressCommitment
+    disableLogs: true
+    events:
+      - httpApi:
+          path: /sismo-address-commitment
+          method: GET
+    role: commitmentMapperRole
+
+  generateSecret:
+    handler: src/handler.generateSecret
+    role: generateSecretRole
+
+plugins:
+  - serverless-plugin-typescript
+
+resources:
+  Resources:
+    commitmentMapperRole:
+      Type: AWS::IAM::Role
+      Properties:
+        Path: /sls/commitment-mapper/
+        RoleName: CommitmentMapperCommon-${sls:stage}
+        AssumeRolePolicyDocument:
+          Version: "2012-10-17"
+          Statement:
+            - Effect: Allow
+              Principal:
+                Service:
+                  - lambda.amazonaws.com
+              Action: sts:AssumeRole
+        Policies:
+          - PolicyName: RevealSecret
+            PolicyDocument:
+              Version: "2012-10-17"
+              Statement:
+                - Effect: Allow
+                  Action:
+                    - secretsmanager:GetSecretValue
+                  Resource:
+                    - "Fn::Join":
+                        - ":"
+                        - - "arn:aws:secretsmanager"
+                          - Ref: "AWS::Region"
+                          - Ref: "AWS::AccountId"
+                          - "secret:commitment-mapper/*"
+          - PolicyName: AssumeAMSRole
+            PolicyDocument:
+              Version: "2012-10-17"
+              Statement:
+                - Effect: Allow
+                  Action:
+                    - sts:AssumeRole
+                  Resource:
+                    - ${self:custom.commitmentMapperDynamoDB.${sls:stage}.role}
+          - PolicyName: PutLogs
+            PolicyDocument:
+              Version: "2012-10-17"
+              Statement:
+                - Effect: Allow
+                  Action:
+                    - logs:CreateLogGroup
+                    - logs:CreateLogStream
+                    - logs:PutLogEvents
+                  Resource:
+                    - "Fn::Join":
+                        - ":"
+                        - - "arn:aws:logs"
+                          - Ref: "AWS::Region"
+                          - Ref: "AWS::AccountId"
+                          - "log-group:/aws/lambda/*:*:*"
+    generateSecretRole:
+      Type: AWS::IAM::Role
+      Properties:
+        Path: /sls/commitment-mapper/
+        RoleName: CommitmentMapperGenerateSecret-${sls:stage}
+        AssumeRolePolicyDocument:
+          Version: "2012-10-17"
+          Statement:
+            - Effect: Allow
+              Principal:
+                Service:
+                  - lambda.amazonaws.com
+              Action: sts:AssumeRole
+        Policies:
+          - PolicyName: DescribeAndCreateSecret
+            PolicyDocument:
+              Version: "2012-10-17"
+              Statement:
+                - Effect: Allow
+                  Action:
+                    - secretsmanager:DescribeSecret
+                    - secretsmanager:CreateSecret
+                  Resource: "*"
+          - PolicyName: PutLogs
+            PolicyDocument:
+              Version: "2012-10-17"
+              Statement:
+                - Effect: Allow
+                  Action:
+                    - logs:CreateLogGroup
+                    - logs:CreateLogStream
+                    - logs:PutLogEvents
+                  Resource:
+                    - "Fn::Join":
+                        - ":"
+                        - - "arn:aws:logs"
+                          - Ref: "AWS::Region"
+                          - Ref: "AWS::AccountId"
+                          - "log-group:/aws/lambda/*:*:*"

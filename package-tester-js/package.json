@@ -1,0 +1,41 @@
+{
+  "name": "@sismo-core/commitment-mapper-tester-js",
+  "version": "1.0.11",
+  "description": "Sismo Commitment Mapper Tester",
+  "license": "MIT",
+  "author": "Sismo core",
+  "main": "lib/cjs/index.js",
+  "module": "lib/esm/index.js",
+  "types": "lib/index.d.ts",
+  "scripts": {
+    "test": "jest",
+    "build": "rollup -c"
+  },
+  "devDependencies": {
+    "@rollup/plugin-commonjs": "^22.0.0",
+    "@rollup/plugin-node-resolve": "^13.2.1",
+    "@rollup/plugin-typescript": "^8.3.2",
+    "@types/jest": "^27.5.0",
+    "ethers": "^5.6.5",
+    "jest": "^28.1.0",
+    "rollup": "^2.70.2",
+    "rollup-plugin-dts": "^4.2.1",
+    "ts-jest": "^28.0.1",
+    "typescript": "^4.6.3"
+  },
+  "dependencies": {
+    "@sismo-core/crypto": "^1.0.2",
+    "tslib": "^2.4.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": [
+    "lib"
+  ],
+  "keywords": [
+    "javascript",
+    "typescript",
+    "zero-knowledge"
+  ]
+}
