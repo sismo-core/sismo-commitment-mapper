@@ -32,7 +32,7 @@ provider:
 functions:
   commit:
     handler: src/handler.commitEddsa
-    provisionedConcurrency: 5
+    provisionedConcurrency: 2
     disableLogs: true
     events:
       - httpApi:

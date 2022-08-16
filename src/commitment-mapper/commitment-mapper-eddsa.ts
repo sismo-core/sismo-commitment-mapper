@@ -21,8 +21,6 @@ export const enum CommitmentStoreNamespace {
   HashCommitment = "hash-commitment",
 }
 
-let poseidon: any = null;
-
 export default class CommitmentMapperEddsa extends CommitmentMapper {
   private _secretManager: SecretManager;
 
@@ -46,7 +44,7 @@ export default class CommitmentMapperEddsa extends CommitmentMapper {
 
   public async getSismoAddressCommitment(): Promise<HashCommitmentReceiptAPIResponse> {
     const sismoAddress = "0x0000000000000000000000000000000000515110";
-    poseidon = await buildPoseidon();
+    const poseidon: any = await buildPoseidon();
     const commitment = poseidon([BigNumber.from(515110)]);
     return this._constructCommitmentReceipt(sismoAddress, commitment);
   }
@@ -63,9 +61,7 @@ export default class CommitmentMapperEddsa extends CommitmentMapper {
     );
 
     // construct the receipt
-    if (!poseidon) {
-      poseidon = await buildPoseidon();
-    }
+    const poseidon = await buildPoseidon();
     const ethAddressBigNumber = BigNumber.from(ethAddress.toLowerCase()).mod(
       SNARK_FIELD
     );

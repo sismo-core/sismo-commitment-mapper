@@ -9,7 +9,7 @@
     "test": "jest"
   },
   "dependencies": {
-    "@sismo-core/crypto": "^1.0.3",
+    "@sismo-core/crypto": "^1.2.0",
     "ethers": "^5.6.5"
   },
   "devDependencies": {
