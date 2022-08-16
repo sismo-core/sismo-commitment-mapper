@@ -1085,14 +1085,16 @@
   dependencies:
     "@sinonjs/commons" "^1.7.0"
 
-"@sismo-core/crypto@^1.0.3":
-  version "1.0.3"
-  resolved "https://registry.yarnpkg.com/@sismo-core/crypto/-/crypto-1.0.3.tgz#300d2e8172f510824aee9d514f94dcaa6575d757"
-  integrity sha512-fmspFl3OiUu76jgC4AY3sEt7cRt64RenZHfcOLDhx/jZDnVBuCzrYdYPC7zaP6gkgv+YlNPE3FUwuVNpZ45hRw==
+"@sismo-core/crypto@^1.2.0":
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/@sismo-core/crypto/-/crypto-1.2.0.tgz#d37551d6ed33852037d06c6f06b7cc74c56ecd50"
+  integrity sha512-3HLv6PvghHdJfALWHgLXPH9XRq9FvglsTNoZk6Lcwc56m7NWJjK0v9esWu2xa75R1FsXrpKFcFUutSepsO1kQA==
   dependencies:
+    blake-hash "^2.0.0"
     circomlib "^2.0.3"
     circomlibjs "^0.1.2"
     ethers "^5.6.1"
+    ffjavascript "^0.2.55"
 
 "@szmarczak/http-timer@^4.0.5":
   version "4.0.6"
@@ -2754,6 +2756,16 @@ ffjavascript@^0.2.45:
   version "0.2.52"
   resolved "https://registry.yarnpkg.com/ffjavascript/-/ffjavascript-0.2.52.tgz#bbe1cc7448df3b0ddd9f1a385e6fd27bf8432982"
   integrity sha512-sTaZCD3zlne1FljARTP5Azq462RKQP6jTFoGzJ0ngqLl+PQ29UjhOYlCAtOPxwhjrHKOxnBWVgHaaxs4BSamaA==
+  dependencies:
+    big-integer "^1.6.48"
+    wasmbuilder "^0.0.12"
+    wasmcurves "0.1.0"
+    web-worker "^1.2.0"
+
+ffjavascript@^0.2.55:
+  version "0.2.55"
+  resolved "https://registry.yarnpkg.com/ffjavascript/-/ffjavascript-0.2.55.tgz#fb4bc53265501526a2916d6a20bbbc06d113d7be"
+  integrity sha512-8X0FCIPOWiK6DTWh3pnE3O6D6nIQsirStAXpWMzRDnoDX7SEnDX4I28aVhwjL7L35XS1vy2AU7zc0UCGYxdLjw==
   dependencies:
     big-integer "^1.6.48"
     wasmbuilder "^0.0.12"
