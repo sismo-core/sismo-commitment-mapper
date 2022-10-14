@@ -7,3 +7,4 @@ cache
 lib
 types
 log_analyze.zip
+.env*

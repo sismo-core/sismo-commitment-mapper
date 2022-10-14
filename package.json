@@ -9,7 +9,9 @@
     "test": "jest"
   },
   "dependencies": {
+    "@octokit/core": "^4.1.0",
     "@sismo-core/crypto": "^1.2.0",
+    "axios": "^1.1.2",
     "ethers": "^5.6.5"
   },
   "devDependencies": {

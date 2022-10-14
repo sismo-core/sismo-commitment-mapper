@@ -3,12 +3,7 @@ import {
   CommitmentMapper,
   CommitmentMapperPublicKey,
 } from "./commitment-mapper";
-import {
-  SNARK_FIELD,
-  EddsaAccount,
-  buildPoseidon,
-  EddsaPublicKey,
-} from "@sismo-core/crypto";
+import { SNARK_FIELD, EddsaAccount, buildPoseidon } from "@sismo-core/crypto";
 import { SecretManager } from "../secret-manager";
 import { BigNumber } from "ethers";
 

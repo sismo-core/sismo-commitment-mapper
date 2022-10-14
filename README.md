@@ -38,7 +38,7 @@ You will find more information in the [documentation](https://commitment-mapper.
 
 ## Hydra Delegated Proof Of Ownership
 
-- URI: https://sibgc1bwn8.execute-api.eu-west-1.amazonaws.com
+- URI: https://x5y521b36b.execute-api.eu-west-1.amazonaws.com
 - EdDSAPubKey:
   - X: `0x0c6c16efc72c198f4549bd069f1e57f091885234b9c140286d80ef431151d644`
   - Y: `0x12c54731563d974ead25d469d2263fdf0e230d5a09f6cd40a06e60210610d642`
@@ -63,7 +63,8 @@ The Poseidon hash algorithm makes the commitmentReceipt easy to verify inside a 
 
 ### API Endpoint
 
-Endpoint: `https://sibgc1bwn8.execute-api.eu-west-1.amazonaws.com/commit-eddsa`
+#### Commit Ethereum account
+Endpoint: `https://x5y521b36b.execute-api.eu-west-1.amazonaws.com/commit-ethereum-eddsa`
 
 Method: `POST`
 
@@ -81,7 +82,7 @@ Response:
 Example:
 
 ```bash
-$ curl -X POST -H 'content-type: application/json' https://sibgc1bwn8.execute-api.eu-west-1.amazonaws.com/commit-eddsa -d @- <<EOF
+$ curl -X POST -H 'content-type: application/json' https://x5y521b36b.execute-api.eu-west-1.amazonaws.com/commit-ethereum-eddsa -d @- <<EOF
 {
     "ethAddress": "0x41ea85211c08227bd62b03f3efc65faaa6cbd1c3",
     "ethSignature": "0xa6c615ef9ebe12168abe3ab17cb99e0a134b9b037425637f09107bd964d1da34264b23b25edd75b15bde9819d4ac8a8395ec4ffe7401a21946680890bbbe0c1a1b",
@@ -104,10 +105,65 @@ EOF
 
 ---
 
+#### Commit Github account
+Endpoint: `https://x5y521b36b.execute-api.eu-west-1.amazonaws.com/commit-github-eddsa`
+
+Method: `POST`
+
+Parameters:
+
+- `githubCode` : Code sent by the OAuth SSO of github
+- `commitment` : The commitment choosen by the user
+
+Response:
+
+- `commitmentMapperPubKey` : The EdDSA public key of the commitment Mapper. This public key will never change.
+- `commitmentReceipt` : The Signature(HashPoseidon(EthereumAddress, Commitment))
+- `account` : Detail of the github account that can be saved in the sismo vault  
+  - `login`: github username
+  - `profileId`: github profile id
+  - `name`: github public name if set
+  - `avatarUrl`: github link to the avatar
+  - `identifier`: 0x100100...000{id} padded address to be used inside sismo groups of account
+
+Example:
+
+```bash
+$ curl -X POST -H 'content-type: application/json' https://x5y521b36b.execute-api.eu-west-1.amazonaws.com/commit-github-eddsa -d @- <<EOF
+{
+    "githubCode": "11c08227bd62b03f3efc65faaa6",
+    "commitment": "0x25a80aa8b7c619ed19da7ae54286b77fd705d2c01fcf974ab1cb3a902f8e3f89"
+}
+EOF
+
+{
+  "commitmentMapperPubKey": [
+    "0x0c6c16efc72c198f4549bd069f1e57f091885234b9c140286d80ef431151d644",
+    "0x12c54731563d974ead25d469d2263fdf0e230d5a09f6cd40a06e60210610d642"
+  ],
+  "commitmentReceipt": [
+    "0x2b17f369369670bef2212c4e0250e8be06d0d1c8bb687b5d61b1c235e1f5fc96",
+    "0x26c89da29c3c5f05eb40ddaa440bd7d2bb2d5be73211ae58c664aa0020a09914",
+    "0x025b5f8dc6d4b1865c77e04954704ea26ba0e0a9dc62d8bc2f8b84ad3348ca54"
+  ],
+  "account": {
+    "login": "leosayous21",
+    "profileId": 11630545,
+    "name": "Léo sayous",
+    "avatarUrl": "https://avatars.githubusercontent.com/u/11630545?v=4",
+    "identifier": "0x1001000000000000000000000000000011630545"
+  }
+}
+```
+
+---
+
+#### Sismo address
+
 The commitmentReceipt fot the sismo address `0x0000000000000000000000000000000000515110` is automatically created. It serves for offchain services which want to use the ZKSMPS offchain verifier without a specific destination.  
 It can be retrieve with this endpoint:
 
-Endpoint: `https://sibgc1bwn8.execute-api.eu-west-1.amazonaws.com/sismo-address-commitment`
+Endpoint: `https://x5y521b36b.execute-api.eu-west-1.amazonaws.com/sismo-address-commitment`
 
 Method: `GET`
 
@@ -119,7 +175,7 @@ Response:
 Example:
 
 ```bash
-curl https://sibgc1bwn8.execute-api.eu-west-1.amazonaws.com/sismo-address-commitment
+curl https://x5y521b36b.execute-api.eu-west-1.amazonaws.com/sismo-address-commitment
 
 {
   "commitmentMapperPubKey": [
