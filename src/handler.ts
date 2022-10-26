@@ -11,21 +11,22 @@ import { randomBytes } from "ethers/lib/utils";
 import { BigNumber } from "ethers";
 import CommitmentMapperEddsa, {
   CommitmentStoreNamespace,
-  HashCommitmentReceiptAPIResponse,
 } from "./commitment-mapper/commitment-mapper-eddsa";
+import { EthereumOwnershipVerifier } from "./ownership-verifiers/ethereum";
+import { GithubOwnershipVerifier } from "./ownership-verifiers/github";
 
-type CommitInputData = {
+type CommitEthereumEddsaInputData = {
   ethAddress: string;
   ethSignature: string;
   commitment: string;
 };
 
-export const commitEddsa: Handler = async (
-  event: APIGatewayEvent,
-  _context: Context
-): Promise<APIGatewayProxyResult> => {
-  const requestData: CommitInputData = JSON.parse(event.body!);
+type CommitGithubEddsaInputData = {
+  githubCode: string;
+  commitment: string;
+};
 
+const commitmentMapperFactory = () => {
   const commitmentStore = getCommitmentStore(
     CommitmentStoreNamespace.HashCommitment,
     CommitmentStoreType.DynamoDBCommitmentStore
@@ -34,14 +35,62 @@ export const commitEddsa: Handler = async (
     commitmentStore,
     getSecretHandler()
   );
+  return commitmentMapper;
+};
+
+export const commitGithubEddsa: Handler = async (
+  event: APIGatewayEvent,
+  _context: Context
+): Promise<APIGatewayProxyResult> => {
+  const requestData: CommitGithubEddsaInputData = JSON.parse(event.body!);
+
+  const commitmentMapper = commitmentMapperFactory();
+  const ownershipVerifier = new GithubOwnershipVerifier();
 
   try {
-    const commitmentReceipt: HashCommitmentReceiptAPIResponse =
-      await commitmentMapper.commit(
-        requestData.ethAddress,
-        requestData.ethSignature,
-        requestData.commitment
-      );
+    const githubAccount = await ownershipVerifier.verify({
+      code: requestData.githubCode,
+    });
+    const commitmentReceipt = await commitmentMapper.commit(
+      githubAccount.identifier,
+      requestData.commitment
+    );
+    const res = {
+      ...commitmentReceipt,
+      account: githubAccount,
+    };
+    return {
+      statusCode: 200,
+      body: JSON.stringify(res),
+    };
+  } catch (e: any) {
+    return {
+      statusCode: 500,
+      body: JSON.stringify({
+        error: e.message,
+      }),
+    };
+  }
+};
+
+export const commitEthereumEddsa: Handler = async (
+  event: APIGatewayEvent,
+  _context: Context
+): Promise<APIGatewayProxyResult> => {
+  const requestData: CommitEthereumEddsaInputData = JSON.parse(event.body!);
+
+  const commitmentMapper = commitmentMapperFactory();
+  const ownershipVerifier = new EthereumOwnershipVerifier();
+
+  try {
+    const account = await ownershipVerifier.verify({
+      ethAddress: requestData.ethAddress,
+      ethSignature: requestData.ethSignature,
+    });
+    const commitmentReceipt = await commitmentMapper.commit(
+      account,
+      requestData.commitment
+    );
     return {
       statusCode: 200,
       body: JSON.stringify(commitmentReceipt),

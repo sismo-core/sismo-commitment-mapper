@@ -26,15 +26,31 @@ provider:
     COMMITMENT_STORE_TABLE_SUFFIX: ${self:custom.commitmentMapperDynamoDB.${sls:stage}.tableNameSuffix}
     COMMITMENT_STORE_REGION: ${self:custom.commitmentMapperDynamoDB.${sls:stage}.region}
     COMMITMENT_STORE_ROLE_ARN: ${self:custom.commitmentMapperDynamoDB.${sls:stage}.role}
+    COMMITMENT_MAPPER_GITHUB_OAUTH_ID: ${env:COMMITMENT_MAPPER_GITHUB_OAUTH_ID}
+    COMMITMENT_MAPPER_GITHUB_OAUTH_SECRET: ${env:COMMITMENT_MAPPER_GITHUB_OAUTH_SECRET}
+
   httpApi:
     cors: true
 
 functions:
+  commitGithub:
+    handler: src/handler.commitGithubEddsa
+    provisionedConcurrency: 1
+    disableLogs: true
+    events:
+      - httpApi:
+          path: /commit-github-eddsa
+          method: POST
+    role: commitmentMapperRole
+    
   commit:
-    handler: src/handler.commitEddsa
+    handler: src/handler.commitEthereumEddsa
     provisionedConcurrency: 2
     disableLogs: true
     events:
+      - httpApi:
+          path: /commit-ethereum-eddsa
+          method: POST
       - httpApi:
           path: /commit-eddsa
           method: POST
