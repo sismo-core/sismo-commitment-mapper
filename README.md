@@ -158,6 +158,78 @@ EOF
 
 ---
 
+#### Commit Twitter account
+The commit twitter account is in 2 phases:
+First the request token route for the OAuth2 with twitter.
+Then the commit twitter eddsa route that let register a commitment for a specific twitter account.
+
+
+Endpoint: `https://x5y521b36b.execute-api.eu-west-1.amazonaws.com/request-twitter-token`
+
+Method: `GET`
+
+Query params:
+
+- `oauth_callback` : The oauth callback to redirect the user when interacting with twitter
+
+Response:
+
+- code: `302`
+- Location Header: `https://api.twitter.com/oauth/authenticate?oauth_token=${requestToken}` 
+
+
+Endpoint: `https://x5y521b36b.execute-api.eu-west-1.amazonaws.com/commit-twitter-eddsa`
+
+Method: `POST`
+
+Parameters:
+
+- `oauthToken` : Code sent by the OAuth SSO of Twitter after having interacted with the twitter frontend
+- `oauthVerifier` : Code sent by the OAuth SSO of Twitter after having interacted with the twitter frontend
+- `commitment` : The commitment chosen by the user
+
+
+Response:
+
+- `commitmentMapperPubKey` : The EdDSA public key of the commitment Mapper. This public key will never change.
+- `commitmentReceipt` : The Signature(HashPoseidon(AccountIdentifier, Commitment))
+- `account` : Detail of the twitter account that can be saved in the sismo vault  
+  - `username`: twitter username
+  - `userId`: twitter profile id
+  - `identifier`: 0x100100...000{id} padded address to be used inside sismo groups of account
+
+
+Example:
+
+```bash
+$ curl -X POST -H 'content-type: application/json' https://x5y521b36b.execute-api.eu-west-1.amazonaws.com/commit-twitter-eddsa -d @- <<EOF
+{
+    "oauthToken": "11c08227bd62b03f3efc65faaa6",
+    "oauthVerifier": "11c08227bd62b03f3efc65faaa6",
+    "commitment": "0x25a80aa8b7c619ed19da7ae54286b77fd705d2c01fcf974ab1cb3a902f8e3f89"
+}
+EOF
+
+{
+  "commitmentMapperPubKey": [
+    "0x0c6c16efc72c198f4549bd069f1e57f091885234b9c140286d80ef431151d644",
+    "0x12c54731563d974ead25d469d2263fdf0e230d5a09f6cd40a06e60210610d642"
+  ],
+  "commitmentReceipt": [
+    "0x2b17f369369670bef2212c4e0250e8be06d0d1c8bb687b5d61b1c235e1f5fc96",
+    "0x26c89da29c3c5f05eb40ddaa440bd7d2bb2d5be73211ae58c664aa0020a09914",
+    "0x025b5f8dc6d4b1865c77e04954704ea26ba0e0a9dc62d8bc2f8b84ad3348ca54"
+  ],
+  "account": {
+    "login": "LeopoldSayous",
+    "profileId": 11630545,
+    "identifier": "0x1002000000000000000000000000000011630545"
+  }
+}
+```
+
+---
+
 #### Sismo address
 
 The commitmentReceipt fot the sismo address `0x0000000000000000000000000000000000515110` is automatically created. It serves for offchain services which want to use the ZKSMPS offchain verifier without a specific destination.  

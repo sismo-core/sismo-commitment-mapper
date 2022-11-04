@@ -14,6 +14,8 @@ import CommitmentMapperEddsa, {
 } from "./commitment-mapper/commitment-mapper-eddsa";
 import { EthereumOwnershipVerifier } from "./ownership-verifiers/ethereum";
 import { GithubOwnershipVerifier } from "./ownership-verifiers/github";
+import { TwitterOwnershipVerifier } from "./ownership-verifiers/twitter";
+import { getCacheStore } from "./cache-store";
 
 type CommitEthereumEddsaInputData = {
   ethAddress: string;
@@ -23,6 +25,12 @@ type CommitEthereumEddsaInputData = {
 
 type CommitGithubEddsaInputData = {
   githubCode: string;
+  commitment: string;
+};
+
+type CommitTwitterEddsaInputData = {
+  oauthToken: string;
+  oauthVerifier: string;
   commitment: string;
 };
 
@@ -58,6 +66,45 @@ export const commitGithubEddsa: Handler = async (
     const res = {
       ...commitmentReceipt,
       account: githubAccount,
+    };
+    return {
+      statusCode: 200,
+      body: JSON.stringify(res),
+    };
+  } catch (e: any) {
+    return {
+      statusCode: 500,
+      body: JSON.stringify({
+        error: e.message,
+      }),
+    };
+  }
+};
+
+export const commitTwitterEddsa: Handler = async (
+  event: APIGatewayEvent,
+  _context: Context
+): Promise<APIGatewayProxyResult> => {
+  const requestData: CommitTwitterEddsaInputData = JSON.parse(event.body!);
+
+  const commitmentMapper = commitmentMapperFactory();
+  const cacheStore = getCacheStore();
+  const ownershipVerifier = new TwitterOwnershipVerifier({
+    cacheStore,
+  });
+
+  try {
+    const twitterAccount = await ownershipVerifier.verify({
+      oauthToken: requestData.oauthToken,
+      oauthVerifier: requestData.oauthVerifier,
+    });
+    const commitmentReceipt = await commitmentMapper.commit(
+      twitterAccount.identifier,
+      requestData.commitment
+    );
+    const res = {
+      ...commitmentReceipt,
+      account: twitterAccount,
     };
     return {
       statusCode: 200,
@@ -127,4 +174,44 @@ export const sismoAddressCommitment: Handler = async () => {
     getSecretHandler()
   );
   return commitmentMapper.getSismoAddressCommitment();
+};
+
+type TwitterGetTokenInputData = {
+  oauth_callback?: string;
+};
+
+export const requestTwitterToken: Handler = async (
+  event: APIGatewayEvent,
+  _context: Context
+): Promise<APIGatewayProxyResult> => {
+  const queryParams: TwitterGetTokenInputData = event.queryStringParameters!;
+  if (!queryParams.oauth_callback) {
+    throw new Error("You should provide an oauth_callback");
+  }
+
+  const cacheStore = getCacheStore();
+  const ownershipVerifier = new TwitterOwnershipVerifier({
+    cacheStore,
+  });
+
+  try {
+    const requestToken = await ownershipVerifier.requestToken({
+      oauthCallback: queryParams.oauth_callback,
+    });
+
+    return {
+      statusCode: 302,
+      headers: {
+        Location: `https://api.twitter.com/oauth/authenticate?oauth_token=${requestToken}`,
+      },
+      body: "",
+    };
+  } catch (e: any) {
+    return {
+      statusCode: 500,
+      body: JSON.stringify({
+        error: e.message,
+      }),
+    };
+  }
 };

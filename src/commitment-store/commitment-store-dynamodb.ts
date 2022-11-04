@@ -1,6 +1,6 @@
 import { ChainableTemporaryCredentials, DynamoDB, Credentials } from "aws-sdk";
 
-import { CommitmentStore, Address, Commitment } from ".";
+import { CommitmentStore, AccountIdentifier, Commitment } from ".";
 
 export default class DynamoDBCommitmentStore implements CommitmentStore {
   private _tableName: string;
@@ -24,12 +24,15 @@ export default class DynamoDBCommitmentStore implements CommitmentStore {
     });
   }
 
-  async add(address: Address, commitment: Commitment): Promise<void> {
+  async add(
+    accountIdentifier: AccountIdentifier,
+    commitment: Commitment
+  ): Promise<void> {
     return this._documentClient
       .put({
         TableName: this._tableName,
         Item: {
-          Address: address,
+          Address: accountIdentifier,
           Commitment: commitment,
         },
       })
@@ -37,11 +40,11 @@ export default class DynamoDBCommitmentStore implements CommitmentStore {
       .then();
   }
 
-  async get(address: Address): Promise<Commitment> {
+  async get(accountIdentifier: AccountIdentifier): Promise<Commitment> {
     return this._documentClient
       .get({
         TableName: this._tableName,
-        Key: { Address: address },
+        Key: { Address: accountIdentifier },
       })
       .promise()
       .then((data) =>
