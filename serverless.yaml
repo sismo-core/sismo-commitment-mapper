@@ -28,6 +28,12 @@ provider:
     COMMITMENT_STORE_ROLE_ARN: ${self:custom.commitmentMapperDynamoDB.${sls:stage}.role}
     COMMITMENT_MAPPER_GITHUB_OAUTH_ID: ${env:COMMITMENT_MAPPER_GITHUB_OAUTH_ID}
     COMMITMENT_MAPPER_GITHUB_OAUTH_SECRET: ${env:COMMITMENT_MAPPER_GITHUB_OAUTH_SECRET}
+    COMMITMENT_MAPPER_TWITTER_CONSUMER_KEY: ${env:COMMITMENT_MAPPER_TWITTER_CONSUMER_KEY}
+    COMMITMENT_MAPPER_TWITTER_CONSUMER_SECRET: ${env:COMMITMENT_MAPPER_TWITTER_CONSUMER_SECRET}
+    COMMITMENT_MAPPER_TWITTER_ACCESS_TOKEN: ${env:COMMITMENT_MAPPER_TWITTER_ACCESS_TOKEN}
+    COMMITMENT_MAPPER_TWITTER_ACCESS_TOKEN_SECRET: ${env:COMMITMENT_MAPPER_TWITTER_ACCESS_TOKEN_SECRET}
+    CACHE_STORE_TABLE_NAME: cache-store-${sls:stage}
+    CACHE_STORE_REGION: eu-west-1 
 
   httpApi:
     cors: true
@@ -42,7 +48,26 @@ functions:
           path: /commit-github-eddsa
           method: POST
     role: commitmentMapperRole
-    
+
+  commitTwitterEddsa:
+    handler: src/handler.commitTwitterEddsa
+    provisionedConcurrency: 1
+    disableLogs: true
+    events:
+      - httpApi:
+          path: /commit-twitter-eddsa
+          method: POST
+    role: commitmentMapperRole
+  
+  requestTwitterToken:
+    handler: src/handler.requestTwitterToken
+    disableLogs: true
+    events:
+      - httpApi:
+          path: /request-twitter-token
+          method: GET
+    role: commitmentMapperRole 
+ 
   commit:
     handler: src/handler.commitEthereumEddsa
     provisionedConcurrency: 2
@@ -74,6 +99,23 @@ plugins:
 
 resources:
   Resources:
+    cacheStore:
+      Type: AWS::DynamoDB::Table
+      DeletionPolicy: Retain
+      Properties:
+        TableName: cache-store-${sls:stage}
+        AttributeDefinitions:
+        - AttributeName: key
+          AttributeType: S
+        KeySchema:
+        - AttributeName: key
+          KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+        TimeToLiveSpecification:
+          AttributeName: expiration
+          Enabled: true
     commitmentMapperRole:
       Type: AWS::IAM::Role
       Properties:
@@ -111,6 +153,19 @@ resources:
                     - sts:AssumeRole
                   Resource:
                     - ${self:custom.commitmentMapperDynamoDB.${sls:stage}.role}
+          - PolicyName: CacheStoreAccess
+            PolicyDocument:
+              Version: "2012-10-17"
+              Statement:
+                - Effect: Allow
+                  Action:
+                    - dynamodb:DescribeTable
+                    - dynamodb:Query
+                    - dynamodb:Scan
+                    - dynamodb:GetItem
+                    - dynamodb:PutItem
+                  Resource:
+                    - "Fn::GetAtt": [cacheStore, Arn]
           - PolicyName: PutLogs
             PolicyDocument:
               Version: "2012-10-17"

@@ -1,8 +1,10 @@
-
-export type Address = string;
+export type AccountIdentifier = string;
 export type Commitment = string;
 
 export interface CommitmentStore {
-  add(address: Address, commitment: Commitment): Promise<void>;
-  get(address: Address): Promise<Commitment>;
+  add(
+    accountIdentifier: AccountIdentifier,
+    commitment: Commitment
+  ): Promise<void>;
+  get(accountIdentifier: AccountIdentifier): Promise<Commitment>;
 }
