@@ -5,8 +5,13 @@ locals {
       commitment_mapper_accounts = ["934818791296"] # staging-common
     }
     prod = {
-      account_id                 = "734017092764"     # prod-commitment-store
+      account_id                 = "734017092764"                   # prod-commitment-store
       commitment_mapper_accounts = ["198096410949", "986476384696"] # prod-commitment-mapper-v0, prod-commitment-mapper-v1
+    }
+    # Deploy only in prod-common !
+    prod-beta = {
+      account_id                 = "214635901820"   # prod-common
+      commitment_mapper_accounts = ["214635901820"] # prod-common
     }
   }
 

@@ -5,6 +5,7 @@ custom:
   profiles:
     dev: staging-common
     prod-v1: prod-commitment-mapper-v1
+    prod-beta: prod-common
   commitmentMapperDynamoDB:
     dev:
       tableNameSuffix: staging
@@ -14,6 +15,10 @@ custom:
       tableNameSuffix: prod
       region: eu-west-1
       role: arn:aws:iam::734017092764:role/commitment-store-dynamodb
+    prod-beta:
+      tableNameSuffix: prod-beta
+      region: eu-west-1
+      role: arn:aws:iam::214635901820:role/commitment-store-dynamodb-prod-beta # prod-common
 
 provider:
   name: aws
