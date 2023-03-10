@@ -6,6 +6,16 @@ custom:
     dev: staging-common
     prod-v1: prod-commitment-mapper-v1
     prod-beta: prod-common
+    dev-beta: prod-common
+  secret-manager:
+    dev:
+      name: "commitment-mapper"
+    prod-v1:
+      name: "commitment-mapper"
+    prod-beta:
+      name: "commitment-mapper"
+    dev-beta:
+      name: "commitment-mapper-dev"
   commitmentMapperDynamoDB:
     dev:
       tableNameSuffix: staging
@@ -19,6 +29,10 @@ custom:
       tableNameSuffix: prod-beta
       region: eu-west-1
       role: arn:aws:iam::214635901820:role/commitment-store-dynamodb-prod-beta # prod-common
+    dev-beta:
+      tableNameSuffix: dev-beta
+      region: eu-west-1
+      role: arn:aws:iam::214635901820:role/commitment-store-dynamodb-dev-beta # prod-common
 
 provider:
   name: aws
@@ -39,6 +53,7 @@ provider:
     COMMITMENT_MAPPER_TWITTER_ACCESS_TOKEN_SECRET: ${env:COMMITMENT_MAPPER_TWITTER_ACCESS_TOKEN_SECRET}
     CACHE_STORE_TABLE_NAME: cache-store-${sls:stage}
     CACHE_STORE_REGION: eu-west-1 
+    SECRETS_MANAGER_NAME: ${self:custom.secret-manager.${sls:stage}.name}
 
   httpApi:
     cors: true
@@ -148,7 +163,7 @@ resources:
                         - - "arn:aws:secretsmanager"
                           - Ref: "AWS::Region"
                           - Ref: "AWS::AccountId"
-                          - "secret:commitment-mapper/*"
+                          - "secret:${self:custom.secret-manager.${sls:stage}.name}/*"
           - PolicyName: AssumeAMSRole
             PolicyDocument:
               Version: "2012-10-17"

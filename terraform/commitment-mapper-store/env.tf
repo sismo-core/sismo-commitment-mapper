@@ -13,6 +13,10 @@ locals {
       account_id                 = "214635901820"   # prod-common
       commitment_mapper_accounts = ["214635901820"] # prod-common
     }
+    dev-beta = {
+      account_id                 = "214635901820"   # prod-common
+      commitment_mapper_accounts = ["214635901820"] # prod-common
+    }
   }
 
   env = local.envs_config[terraform.workspace]
