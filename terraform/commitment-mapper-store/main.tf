@@ -29,7 +29,7 @@ data "aws_iam_policy_document" "dynamodb_access" {
     actions = [
       "dynamodb:Get*",
       "dynamodb:PutItem",
-      "dynamodb:Update*",
+      "dynamodb:UpdateItem",
     ]
     effect    = "Allow"
     resources = [aws_dynamodb_table.commitment_store.arn]
