@@ -35,6 +35,7 @@ export default class DynamoDBCommitmentStore implements CommitmentStore {
           Address: accountIdentifier,
           Commitment: commitment,
         },
+        ConditionExpression: "attribute_not_exists(Address)"
       })
       .promise()
       .then();

@@ -25,8 +25,9 @@ export abstract class CommitmentMapper {
       if (commitment != retrieveCommitment) {
         throw new Error("Address is already used for a commitment!");
       }
+    } else {
+      await this._storeCommitment(account, commitment);
     }
-    await this._storeCommitment(account, commitment);
 
     // send back a commitment receipt linked to this commitment
     return this._constructCommitmentReceipt(account, commitment);
