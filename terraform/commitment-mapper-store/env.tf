@@ -13,6 +13,10 @@ locals {
       account_id                 = "214635901820"   # prod-common
       commitment_mapper_accounts = ["214635901820"] # prod-common
     }
+    staging-beta = {
+      account_id                 = "934818791296"   # staging-common
+      commitment_mapper_accounts = ["934818791296"] # staging-common
+    }
     dev-beta = {
       account_id                 = "214635901820"   # prod-common
       commitment_mapper_accounts = ["214635901820"] # prod-common

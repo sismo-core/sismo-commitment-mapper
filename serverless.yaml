@@ -6,6 +6,7 @@ custom:
     dev: staging-common
     prod-v1: prod-commitment-mapper-v1
     prod-beta: prod-common
+    staging-beta: staging-common
     dev-beta: prod-common
   secret-manager:
     dev:
@@ -14,6 +15,8 @@ custom:
       name: "commitment-mapper"
     prod-beta:
       name: "commitment-mapper"
+    staging-beta:
+      name: "commitment-mapper-staging"
     dev-beta:
       name: "commitment-mapper-dev"
   commitmentMapperDynamoDB:
@@ -29,6 +32,10 @@ custom:
       tableNameSuffix: prod-beta
       region: eu-west-1
       role: arn:aws:iam::214635901820:role/commitment-store-dynamodb-prod-beta # prod-common
+    staging-beta:
+      tableNameSuffix: staging-beta
+      region: eu-west-1
+      role: arn:aws:iam::091325440235:role/commitment-store-dynamodb-staging-beta # staging-common
     dev-beta:
       tableNameSuffix: dev-beta
       region: eu-west-1

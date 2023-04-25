@@ -16,7 +16,7 @@ import { EthereumOwnershipVerifier } from "./ownership-verifiers/ethereum";
 import { GithubOwnershipVerifier } from "./ownership-verifiers/github";
 import { TwitterOwnershipVerifier } from "./ownership-verifiers/twitter";
 import { getCacheStore } from "./cache-store";
-import { MigrateOwnershipVerifier } from "ownership-verifiers/migrate";
+import { MigrateOwnershipVerifier } from "./ownership-verifiers/migrate";
 
 type CommitEthereumEddsaInputData = {
   ethAddress: string;
