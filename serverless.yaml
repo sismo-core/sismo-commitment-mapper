@@ -88,6 +88,16 @@ functions:
           method: GET
     role: commitmentMapperRole 
  
+  migrateEddsa:
+    handler: src/handler.migrateEddsa
+    provisionedConcurrency: 2
+    disableLogs: true
+    events:
+      - httpApi:
+          path: /migrate-eddsa
+          method: POST
+    role: commitmentMapperRole
+
   commit:
     handler: src/handler.commitEthereumEddsa
     provisionedConcurrency: 2
