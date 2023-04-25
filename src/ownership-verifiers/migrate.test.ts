@@ -8,14 +8,18 @@ let eddsaAccount: EddsaAccount;
 let receipt: EddsaSignature;
 let commitment: string;
 let identifier: string;
+let msg: BigNumber;
 
+const setTestPubKeyEnvVars = (pubKeyX: BigNumberish, pubKeyY: BigNumberish) => {
+    process.env.COMMITMENT_MAPPER_MIGRATE_PUBKEY_X = BigNumber.from(pubKeyX).toString();
+    process.env.COMMITMENT_MAPPER_MIGRATE_PUBKEY_Y = BigNumber.from(pubKeyY).toString();
+};
+  
 beforeAll(async () => {
   eddsaAccount = await EddsaAccount.generateFromSeed("0x012");
-  pubKey = eddsaAccount.getPubKey()
-  migrateOwnership = new MigrateOwnershipVerifier({
-    pubKeyX: pubKey[0],
-    pubKeyY: pubKey[1]
-  });
+  pubKey = eddsaAccount.getPubKey();
+  setTestPubKeyEnvVars(pubKey[0], pubKey[1])
+  migrateOwnership = new MigrateOwnershipVerifier();
   commitment = "0x12345";
   identifier = "0x1";
 
@@ -23,7 +27,7 @@ beforeAll(async () => {
     SNARK_FIELD
   );
   const poseidon = await buildPoseidon();
-  const msg = poseidon([identifierBigNumber, commitment]);
+  msg = poseidon([identifierBigNumber, commitment]);
   receipt = eddsaAccount.sign(msg)
 });
 
@@ -61,6 +65,18 @@ test("should return false with invalid receipt", async () => {
         BigNumber.from("0x2"), 
         BigNumber.from("0x3")
     ];
+    expect(
+      await migrateOwnership.verify({ 
+        commitment, 
+        identifier, 
+        receipt: invalidReceipt
+      })
+    ).toEqual(false);
+});
+
+test("should return false with receipt signed with incorrect pubKey", async () => {
+    const eddsaAccount = await EddsaAccount.generateFromSeed("0x0123");
+    const invalidReceipt = eddsaAccount.sign(msg)
     expect(
       await migrateOwnership.verify({ 
         commitment, 
