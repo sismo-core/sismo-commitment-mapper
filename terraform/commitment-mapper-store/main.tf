@@ -9,6 +9,10 @@ resource "aws_dynamodb_table" "commitment_store" {
     name = "Address"
     type = "S"
   }
+
+  point_in_time_recovery {
+    enabled = true
+  }
 }
 
 
@@ -37,7 +41,7 @@ data "aws_iam_policy_document" "dynamodb_access" {
 }
 
 resource "aws_iam_role" "dynamodb_access" {
-  name               = "commitment-store-dynamodb"
+  name               = "commitment-store-dynamodb-${terraform.workspace}"
   assume_role_policy = data.aws_iam_policy_document.assume_role.json
 
   inline_policy {

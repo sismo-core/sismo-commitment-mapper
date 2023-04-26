@@ -16,6 +16,7 @@ import { EthereumOwnershipVerifier } from "./ownership-verifiers/ethereum";
 import { GithubOwnershipVerifier } from "./ownership-verifiers/github";
 import { TwitterOwnershipVerifier } from "./ownership-verifiers/twitter";
 import { getCacheStore } from "./cache-store";
+import { MigrateOwnershipVerifier } from "./ownership-verifiers/migrate";
 
 type CommitEthereumEddsaInputData = {
   ethAddress: string;
@@ -33,6 +34,13 @@ type CommitTwitterEddsaInputData = {
   oauthVerifier: string;
   commitment: string;
 };
+
+type MigrateEddsaInputData = {
+  identifier: string;
+  commitmentReceipt: any;
+  oldCommitment: string;
+  newCommitment: string;
+}
 
 const commitmentMapperFactory = () => {
   const commitmentStore = getCommitmentStore(
@@ -109,6 +117,40 @@ export const commitTwitterEddsa: Handler = async (
     return {
       statusCode: 200,
       body: JSON.stringify(res),
+    };
+  } catch (e: any) {
+    return {
+      statusCode: 500,
+      body: JSON.stringify({
+        error: e.message,
+      }),
+    };
+  }
+};
+
+export const migrateEddsa: Handler = async (
+  event: APIGatewayEvent,
+  _context: Context
+): Promise<APIGatewayProxyResult> => {
+  const requestData: MigrateEddsaInputData = JSON.parse(event.body!);
+
+  const commitmentMapper = commitmentMapperFactory();
+  const ownershipVerifier = new MigrateOwnershipVerifier();
+
+  try {
+    const isVerified = await ownershipVerifier.verify({
+      receipt: requestData.commitmentReceipt,
+      identifier: requestData.identifier,
+      commitment: requestData.oldCommitment
+    });
+    if (!isVerified) throw new Error("Invalid commitmentReceipt");
+    const commitmentReceipt = await commitmentMapper.commit(
+      requestData.identifier,
+      requestData.newCommitment
+    );
+    return {
+      statusCode: 200,
+      body: JSON.stringify(commitmentReceipt),
     };
   } catch (e: any) {
     return {

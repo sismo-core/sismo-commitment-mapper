@@ -3,7 +3,7 @@ import { SecretsManager } from "aws-sdk";
 import { SecretManager } from "./secret-manager";
 
 export default class SecretManagerAWS extends SecretManager {
-  private _secretName = "commitment-mapper/secret3";
+  private _secretName = `${process.env.SECRETS_MANAGER_NAME}/secret3`;
   private _secretManager = new SecretsManager();
 
   protected async _exists(): Promise<boolean> {

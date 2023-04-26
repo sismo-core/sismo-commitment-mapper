@@ -5,6 +5,20 @@ custom:
   profiles:
     dev: staging-common
     prod-v1: prod-commitment-mapper-v1
+    prod-beta: prod-common
+    staging-beta: staging-common
+    dev-beta: prod-common
+  secret-manager:
+    dev:
+      name: "commitment-mapper"
+    prod-v1:
+      name: "commitment-mapper"
+    prod-beta:
+      name: "commitment-mapper"
+    staging-beta:
+      name: "commitment-mapper-staging"
+    dev-beta:
+      name: "commitment-mapper-dev"
   commitmentMapperDynamoDB:
     dev:
       tableNameSuffix: staging
@@ -14,6 +28,18 @@ custom:
       tableNameSuffix: prod
       region: eu-west-1
       role: arn:aws:iam::734017092764:role/commitment-store-dynamodb
+    prod-beta:
+      tableNameSuffix: prod-beta
+      region: eu-west-1
+      role: arn:aws:iam::214635901820:role/commitment-store-dynamodb-prod-beta # prod-common
+    staging-beta:
+      tableNameSuffix: staging-beta
+      region: eu-west-1
+      role: arn:aws:iam::934818791296:role/commitment-store-dynamodb-staging-beta # staging-common
+    dev-beta:
+      tableNameSuffix: dev-beta
+      region: eu-west-1
+      role: arn:aws:iam::214635901820:role/commitment-store-dynamodb-dev-beta # prod-common
 
 provider:
   name: aws
@@ -32,8 +58,11 @@ provider:
     COMMITMENT_MAPPER_TWITTER_CONSUMER_SECRET: ${env:COMMITMENT_MAPPER_TWITTER_CONSUMER_SECRET}
     COMMITMENT_MAPPER_TWITTER_ACCESS_TOKEN: ${env:COMMITMENT_MAPPER_TWITTER_ACCESS_TOKEN}
     COMMITMENT_MAPPER_TWITTER_ACCESS_TOKEN_SECRET: ${env:COMMITMENT_MAPPER_TWITTER_ACCESS_TOKEN_SECRET}
+    COMMITMENT_MAPPER_MIGRATE_PUBKEY_X: ${env:COMMITMENT_MAPPER_MIGRATE_PUBKEY_X}
+    COMMITMENT_MAPPER_MIGRATE_PUBKEY_Y: ${env:COMMITMENT_MAPPER_MIGRATE_PUBKEY_Y}
     CACHE_STORE_TABLE_NAME: cache-store-${sls:stage}
     CACHE_STORE_REGION: eu-west-1 
+    SECRETS_MANAGER_NAME: ${self:custom.secret-manager.${sls:stage}.name}
 
   httpApi:
     cors: true
@@ -68,6 +97,16 @@ functions:
           method: GET
     role: commitmentMapperRole 
  
+  migrateEddsa:
+    handler: src/handler.migrateEddsa
+    provisionedConcurrency: 2
+    disableLogs: true
+    events:
+      - httpApi:
+          path: /migrate-eddsa
+          method: POST
+    role: commitmentMapperRole
+
   commit:
     handler: src/handler.commitEthereumEddsa
     provisionedConcurrency: 2
@@ -143,7 +182,7 @@ resources:
                         - - "arn:aws:secretsmanager"
                           - Ref: "AWS::Region"
                           - Ref: "AWS::AccountId"
-                          - "secret:commitment-mapper/*"
+                          - "secret:${self:custom.secret-manager.${sls:stage}.name}/*"
           - PolicyName: AssumeAMSRole
             PolicyDocument:
               Version: "2012-10-17"

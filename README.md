@@ -266,6 +266,8 @@ curl https://x5y521b36b.execute-api.eu-west-1.amazonaws.com/sismo-address-commit
 
 - staging: https://x5y521b36b.execute-api.eu-west-1.amazonaws.com
 - prod-v1: https://sibgc1bwn8.execute-api.eu-west-1.amazonaws.com
+- prod-beta: https://x93oogcd5e.execute-api.eu-west-1.amazonaws.com
+- dev-beta: https://btwu3bqo4a.execute-api.eu-west-1.amazonaws.com
 
 ## License
 
