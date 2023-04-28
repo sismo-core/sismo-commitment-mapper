@@ -205,8 +205,7 @@ Example:
 $ curl -X POST -H 'content-type: application/json' https://x5y521b36b.execute-api.eu-west-1.amazonaws.com/commit-twitter-eddsa -d @- <<EOF
 {
     "oauthToken": "11c08227bd62b03f3efc65faaa6",
-    "oauthVerifier": "11c08227bd62b03f3efc65faaa6",
-    "commitment": "0x25a80aa8b7c619ed19da7ae54286b77fd705d2c01fcf974ab1cb3a902f8e3f89"
+    "oauthVerifier": "11c08227bd62b03f3efc65faaa6"
 }
 EOF
 
@@ -268,6 +267,23 @@ curl https://x5y521b36b.execute-api.eu-west-1.amazonaws.com/sismo-address-commit
 - prod-v1: https://sibgc1bwn8.execute-api.eu-west-1.amazonaws.com
 - prod-beta: https://x93oogcd5e.execute-api.eu-west-1.amazonaws.com
 - dev-beta: https://btwu3bqo4a.execute-api.eu-west-1.amazonaws.com
+
+## Dev environment 
+
+### Running the commitment mapper locally
+Launch in dev mode on staging environment.
+```bash
+source .env.staging-beta.sh
+yarn dev
+```
+
+### Executing the tests
+
+Running the docker container is required for a few tests to pass.
+```bash
+docker-compose -f docker-compose.test.yaml up
+npx jest
+```
 
 ## License
 
