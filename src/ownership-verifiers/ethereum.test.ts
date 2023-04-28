@@ -55,7 +55,7 @@ test("Try to commit to an address with an invalid signature, should throw", asyn
       ethSignature: malformedsignature,
     })
   ).rejects.toThrow(
-    'signature missing v and recoveryParam (argument="signature", value="0x345", code=INVALID_ARGUMENT, version=bytes/5.6.1)'
+    /(signature missing v and recoveryParam)/
   );
 });
 

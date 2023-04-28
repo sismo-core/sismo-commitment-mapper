@@ -4,6 +4,9 @@ export * from "./cache-store";
 
 import { CacheStoreDynamodb } from "./cache-store-dynamodb";
 import { CacheStoreLocal } from "./cache-store-local";
+import { DynamoDB } from "aws-sdk";
+
+let offlineModeLocalCacheStoreSingleton: any = null;
 
 const getDynamoDBCacheStoreInstance = () => {
   const env = process.env;
@@ -11,13 +14,20 @@ const getDynamoDBCacheStoreInstance = () => {
     throw "CACHE_STORE_REGION and CACHE_STORE_TABLE_NAME env vars must be set";
   }
   return new CacheStoreDynamodb(
-    env.CACHE_STORE_TABLE_NAME,
-    env.CACHE_STORE_REGION
+    new DynamoDB.DocumentClient({
+      region: env.CACHE_STORE_REGION,
+    }),
+    env.CACHE_STORE_TABLE_NAME
   );
 };
 
 export const getCacheStore = () => {
-  return process.env.IS_LOCAL
-    ? new CacheStoreLocal()
-    : getDynamoDBCacheStoreInstance();
+  if(process.env.IS_OFFLINE === 'true') {
+    if(!offlineModeLocalCacheStoreSingleton) {
+      offlineModeLocalCacheStoreSingleton = new CacheStoreLocal();
+    }
+    return offlineModeLocalCacheStoreSingleton;
+  }
+
+  return  getDynamoDBCacheStoreInstance();
 };

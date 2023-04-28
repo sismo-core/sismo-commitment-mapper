@@ -9,11 +9,14 @@ export const enum SecretHandlerType {
 }
 
 export const getSecretHandler = (force?: SecretHandlerType) => {
+  const isLocal = process.env.IS_LOCAL || process.env.IS_OFFLINE === 'true'; 
+
+  if (isLocal || force === SecretHandlerType.LocalSecret) {
+    return new LocalSecret();
+  }
   if (force === SecretHandlerType.SecretManagerAWS) {
     return new SecretManagerAWS();
   }
-  if (force === SecretHandlerType.LocalSecret) {
-    return new LocalSecret();
-  }
-  return process.env.IS_LOCAL ? new LocalSecret() : new SecretManagerAWS();
+
+  return new SecretManagerAWS();
 };
