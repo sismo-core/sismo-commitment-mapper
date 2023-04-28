@@ -52,14 +52,19 @@ provider:
     COMMITMENT_STORE_TABLE_SUFFIX: ${self:custom.commitmentMapperDynamoDB.${sls:stage}.tableNameSuffix}
     COMMITMENT_STORE_REGION: ${self:custom.commitmentMapperDynamoDB.${sls:stage}.region}
     COMMITMENT_STORE_ROLE_ARN: ${self:custom.commitmentMapperDynamoDB.${sls:stage}.role}
+    COMMITMENT_MAPPER_BEARER_TOKEN: ${env:COMMITMENT_MAPPER_BEARER_TOKEN}
     COMMITMENT_MAPPER_GITHUB_OAUTH_ID: ${env:COMMITMENT_MAPPER_GITHUB_OAUTH_ID}
     COMMITMENT_MAPPER_GITHUB_OAUTH_SECRET: ${env:COMMITMENT_MAPPER_GITHUB_OAUTH_SECRET}
     COMMITMENT_MAPPER_TWITTER_CONSUMER_KEY: ${env:COMMITMENT_MAPPER_TWITTER_CONSUMER_KEY}
     COMMITMENT_MAPPER_TWITTER_CONSUMER_SECRET: ${env:COMMITMENT_MAPPER_TWITTER_CONSUMER_SECRET}
+    COMMITMENT_MAPPER_TWITTER_CLIENT_ID: ${env:COMMITMENT_MAPPER_TWITTER_CLIENT_ID}
+    COMMITMENT_MAPPER_TWITTER_CLIENT_SECRET: ${env:COMMITMENT_MAPPER_TWITTER_CLIENT_SECRET}
     COMMITMENT_MAPPER_TWITTER_ACCESS_TOKEN: ${env:COMMITMENT_MAPPER_TWITTER_ACCESS_TOKEN}
     COMMITMENT_MAPPER_TWITTER_ACCESS_TOKEN_SECRET: ${env:COMMITMENT_MAPPER_TWITTER_ACCESS_TOKEN_SECRET}
     COMMITMENT_MAPPER_MIGRATE_PUBKEY_X: ${env:COMMITMENT_MAPPER_MIGRATE_PUBKEY_X}
     COMMITMENT_MAPPER_MIGRATE_PUBKEY_Y: ${env:COMMITMENT_MAPPER_MIGRATE_PUBKEY_Y}
+    FIFO_QUEUE_TABLE_NAME: fifo-queue-${sls:stage}
+    FIFO_QUEUE_REGION: eu-west-1 
     CACHE_STORE_TABLE_NAME: cache-store-${sls:stage}
     CACHE_STORE_REGION: eu-west-1 
     SECRETS_MANAGER_NAME: ${self:custom.secret-manager.${sls:stage}.name}
@@ -87,7 +92,33 @@ functions:
           path: /commit-twitter-eddsa
           method: POST
     role: commitmentMapperRole
-  
+
+  commitTwitterV2Eddsa:
+    handler: src/handlers/twitter-v2.commitTwitterV2Eddsa
+    provisionedConcurrency: 1
+    disableLogs: true
+    events:
+      - httpApi:
+          path: /commit-twitter-v2-eddsa
+          method: POST
+    role: commitmentMapperRole
+
+  getTwitterV2Token:
+    handler: src/handlers/twitter-v2.getTwitterV2Token
+    events:
+      - httpApi:
+          path: /get-twitter-v2-access-token
+          method: GET
+    role: commitmentMapperRole
+
+  getTwitterV2Url:
+    handler: src/handlers/twitter-v2.getTwitterV2Url
+    events:
+      - httpApi:
+          path: /get-twitter-v2-url
+          method: GET
+    role: commitmentMapperRole
+
   requestTwitterToken:
     handler: src/handler.requestTwitterToken
     disableLogs: true
@@ -135,9 +166,28 @@ functions:
 
 plugins:
   - serverless-plugin-typescript
+  - serverless-offline
 
 resources:
   Resources:
+    fifoQueue:
+      Type: AWS::DynamoDB::Table
+      DeletionPolicy: Retain
+      Properties:
+        TableName: fifo-queue-${sls:stage}
+        AttributeDefinitions:
+        - AttributeName: pk
+          AttributeType: S
+        - AttributeName: timestamp
+          AttributeType: N
+        KeySchema:
+        - AttributeName: pk
+          KeyType: HASH
+        - AttributeName: timestamp
+          KeyType: RANGE
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
     cacheStore:
       Type: AWS::DynamoDB::Table
       DeletionPolicy: Retain
@@ -192,6 +242,20 @@ resources:
                     - sts:AssumeRole
                   Resource:
                     - ${self:custom.commitmentMapperDynamoDB.${sls:stage}.role}
+          - PolicyName: FifoQueueAccess
+            PolicyDocument:
+              Version: "2012-10-17"
+              Statement:
+                - Effect: Allow
+                  Action:
+                    - dynamodb:DescribeTable
+                    - dynamodb:Query
+                    - dynamodb:Scan
+                    - dynamodb:GetItem
+                    - dynamodb:PutItem
+                    - dynamodb:DeleteItem
+                  Resource:
+                    - "Fn::GetAtt": [fifoQueue, Arn]
           - PolicyName: CacheStoreAccess
             PolicyDocument:
               Version: "2012-10-17"

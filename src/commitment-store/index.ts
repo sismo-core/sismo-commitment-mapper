@@ -8,6 +8,8 @@ export const enum CommitmentStoreType {
   LocalCommitmentStore,
 }
 
+let offlineModeLocalStoreSingleton: any = null;
+
 const getDynamoDBCommitmentStoreInstance = (namespace: string) => {
   const env = process.env;
   if (
@@ -31,13 +33,19 @@ export const getCommitmentStore = (
   namespace: string,
   force?: CommitmentStoreType
 ) => {
+  if(process.env.IS_LOCAL || force === CommitmentStoreType.LocalCommitmentStore) {
+    return new LocalCommitmentStore();
+  }
+
+  if(process.env.IS_OFFLINE === 'true') {
+    if(!offlineModeLocalStoreSingleton) {
+      offlineModeLocalStoreSingleton = new LocalCommitmentStore();
+    }
+    return offlineModeLocalStoreSingleton;
+  }
+
   if (force === CommitmentStoreType.DynamoDBCommitmentStore) {
     return getDynamoDBCommitmentStoreInstance(namespace);
   }
-  if (force === CommitmentStoreType.LocalCommitmentStore) {
-    return new LocalCommitmentStore();
-  }
-  return process.env.IS_LOCAL
-    ? new LocalCommitmentStore()
-    : getDynamoDBCommitmentStoreInstance(namespace);
+  return getDynamoDBCommitmentStoreInstance(namespace);
 };

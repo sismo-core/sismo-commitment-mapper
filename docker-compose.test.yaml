@@ -1,0 +1,8 @@
+version: "3.8"
+services:
+  dynamodb-local:
+    command: "-jar /home/dynamodblocal/DynamoDBLocal.jar -sharedDb -dbPath /tmp"
+    image: "amazon/dynamodb-local:latest"
+    ports:
+      - "9000:8000"
+    user: root

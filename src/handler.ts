@@ -17,6 +17,7 @@ import { GithubOwnershipVerifier } from "./ownership-verifiers/github";
 import { TwitterOwnershipVerifier } from "./ownership-verifiers/twitter";
 import { getCacheStore } from "./cache-store";
 import { MigrateOwnershipVerifier } from "./ownership-verifiers/migrate";
+import { commitmentMapperFactory } from "./commitment-mapper";
 
 type CommitEthereumEddsaInputData = {
   ethAddress: string;
@@ -40,18 +41,6 @@ type MigrateEddsaInputData = {
   commitmentReceipt: any;
   oldCommitment: string;
   newCommitment: string;
-}
-
-const commitmentMapperFactory = () => {
-  const commitmentStore = getCommitmentStore(
-    CommitmentStoreNamespace.HashCommitment,
-    CommitmentStoreType.DynamoDBCommitmentStore
-  );
-  const commitmentMapper = new CommitmentMapperEddsa(
-    commitmentStore,
-    getSecretHandler()
-  );
-  return commitmentMapper;
 };
 
 export const commitGithubEddsa: Handler = async (
@@ -141,7 +130,7 @@ export const migrateEddsa: Handler = async (
     const isVerified = await ownershipVerifier.verify({
       receipt: requestData.commitmentReceipt,
       identifier: requestData.identifier,
-      commitment: requestData.oldCommitment
+      commitment: requestData.oldCommitment,
     });
     if (!isVerified) throw new Error("Invalid commitmentReceipt");
     const commitmentReceipt = await commitmentMapper.commit(
