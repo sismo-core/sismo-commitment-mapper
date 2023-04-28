@@ -31,13 +31,12 @@ export const getCommitmentStore = (
   namespace: string,
   force?: CommitmentStoreType
 ) => {
+  const isLocal = process.env.IS_LOCAL || process.env.IS_OFFLINE === 'true'; 
+  if(isLocal || force === CommitmentStoreType.LocalCommitmentStore) {
+    return new LocalCommitmentStore();
+  }
   if (force === CommitmentStoreType.DynamoDBCommitmentStore) {
     return getDynamoDBCommitmentStoreInstance(namespace);
   }
-  if (force === CommitmentStoreType.LocalCommitmentStore) {
-    return new LocalCommitmentStore();
-  }
-  return process.env.IS_LOCAL
-    ? new LocalCommitmentStore()
-    : getDynamoDBCommitmentStoreInstance(namespace);
+  return getDynamoDBCommitmentStoreInstance(namespace);
 };
