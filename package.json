@@ -6,6 +6,7 @@
   "scripts": {
     "lint": "eslint src",
     "format": "prettier src --write",
+    "dev": "npx sls offline --useInProcess",
     "test": "jest"
   },
   "dependencies": {

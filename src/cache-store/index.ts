@@ -5,6 +5,8 @@ export * from "./cache-store";
 import { CacheStoreDynamodb } from "./cache-store-dynamodb";
 import { CacheStoreLocal } from "./cache-store-local";
 
+let offlineModeLocalCacheStoreSingleton: any = null;
+
 const getDynamoDBCacheStoreInstance = () => {
   const env = process.env;
   if (!env.CACHE_STORE_REGION || !env.CACHE_STORE_TABLE_NAME) {
@@ -17,7 +19,14 @@ const getDynamoDBCacheStoreInstance = () => {
 };
 
 export const getCacheStore = () => {
-  return process.env.IS_LOCAL
-    ? new CacheStoreLocal()
-    : getDynamoDBCacheStoreInstance();
+  if(process.env.IS_OFFLINE === 'true') {
+    if(!offlineModeLocalCacheStoreSingleton) {
+      offlineModeLocalCacheStoreSingleton = new CacheStoreLocal();
+      console.log('new cache store');
+    }
+    console.log('use cache store');
+    return offlineModeLocalCacheStoreSingleton;
+  }
+
+  return  getDynamoDBCacheStoreInstance();
 };
