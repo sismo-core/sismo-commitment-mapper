@@ -205,8 +205,7 @@ Example:
 $ curl -X POST -H 'content-type: application/json' https://x5y521b36b.execute-api.eu-west-1.amazonaws.com/commit-twitter-eddsa -d @- <<EOF
 {
     "oauthToken": "11c08227bd62b03f3efc65faaa6",
-    "oauthVerifier": "11c08227bd62b03f3efc65faaa6",
-    "commitment": "0x25a80aa8b7c619ed19da7ae54286b77fd705d2c01fcf974ab1cb3a902f8e3f89"
+    "oauthVerifier": "11c08227bd62b03f3efc65faaa6"
 }
 EOF
 

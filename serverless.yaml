@@ -87,7 +87,25 @@ functions:
           path: /commit-twitter-eddsa
           method: POST
     role: commitmentMapperRole
-  
+
+  commitTwitterV2Eddsa:
+    handler: src/handlers/twitter-v2.commitTwitterV2Eddsa
+    provisionedConcurrency: 1
+    disableLogs: true
+    events:
+      - httpApi:
+          path: /commit-twitter-v2-eddsa
+          method: POST
+    role: commitmentMapperRole
+
+  getTwitterV2Token:
+    handler: src/handlers/twitter-v2.getTwitterV2Token
+    events:
+      - httpApi:
+          path: /get-twitter-access-token
+          method: GET
+    role: commitmentMapperRole
+
   requestTwitterToken:
     handler: src/handler.requestTwitterToken
     disableLogs: true

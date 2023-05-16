@@ -14,16 +14,19 @@
     "@sismo-core/crypto": "^1.2.0",
     "axios": "^1.1.2",
     "ethers": "^5.6.5",
-    "twittersignin": "^1.2.0"
+    "twitter-api-sdk": "^1.2.1",
+    "twittersignin": "^1.2.0",
+    "typescript-eslint": "^0.0.1-alpha.0"
   },
   "devDependencies": {
     "@types/aws-lambda": "^8.10.93",
     "@types/jest": "^27.5.0",
+    "@types/node-fetch": "^2.6.3",
     "@typescript-eslint/eslint-plugin": "^5.13.0",
     "@typescript-eslint/parser": "^5.13.0",
-    "eslint": "^8.10.0",
+    "eslint": "^8.39.0",
     "jest": "^28.1.0",
-    "prettier": "^2.5.1",
+    "prettier": "^2.8.8",
     "serverless": "^3.1.1",
     "serverless-offline": "^12.0.4",
     "serverless-plugin-typescript": "^2.1.1",
