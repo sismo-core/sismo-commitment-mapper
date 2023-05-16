@@ -7,11 +7,14 @@ import { LocalFifoQueue } from "./fifo-queue-local";
 let offlineLocalFifoQueueSingleton: any = null;
 
 const getDynamoDBFifoQueueInstance = () => {
-  // const env = process.env;
-  // if (!env.CACHE_STORE_REGION || !env.CACHE_STORE_TABLE_NAME) {
-  //   throw "CACHE_STORE_REGION and CACHE_STORE_TABLE_NAME env vars must be set";
-  // }
-  return new FifoQueueDynamodb();
+  const env = process.env;
+  if (!env.FIFO_QUEUE_REGION || !env.FIFO_QUEUE_TABLE_NAME) {
+    throw "FIFO_QUEUE_REGION and FIFO_QUEUE_TABLE_NAME env vars must be set";
+  }
+  return new FifoQueueDynamodb(
+    env.FIFO_QUEUE_TABLE_NAME,
+    env.FIFO_QUEUE_REGION
+  );
 };
 
 export const fifoQueueFactory = () => {

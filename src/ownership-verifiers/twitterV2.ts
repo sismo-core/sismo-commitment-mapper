@@ -20,8 +20,6 @@ export type TwitterV2Account = {
   identifier: string;
 };
 
-// http://localhost:3001/redirect?state=commitment-mapper-twitter&code=SkpkSHBQT1U1a1hCdTVaNzQ2Xy1zZ3FfWHdrWFctWW52b3JyOEN2Ny1yX09tOjE2ODMwNjAwMDExNzQ6MToxOmFjOjE
-
 export const TWITTER_SCOPES: OAuth2Scopes[] = [
   "tweet.read",
   "users.read",
@@ -142,3 +140,4 @@ export class TwitterV2OwnershipVerifier {
 //   state: STATE,
 //   code_challenge_method: "s256",
 // });
+// //
