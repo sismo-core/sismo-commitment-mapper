@@ -91,7 +91,7 @@ functions:
   commitTwitterV2Eddsa:
     handler: src/handlers/twitter-v2.commitTwitterV2Eddsa
     provisionedConcurrency: 1
-    disableLogs: true
+    # disableLogs: true
     events:
       - httpApi:
           path: /commit-twitter-v2-eddsa

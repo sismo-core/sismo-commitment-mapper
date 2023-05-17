@@ -18,17 +18,22 @@ export const commitTwitterV2Eddsa: Handler = async (
   event: APIGatewayEvent,
   _context: Context
 ): Promise<APIGatewayProxyResult> => {
+  console.log("21");
   const requestData: CommitTwitterV2EddsaInputData = JSON.parse(event.body!);
+  console.log("requestData", requestData);
 
   const commitmentMapper = commitmentMapperFactory();
   const fifoQueue = fifoQueueFactory();
+  console.log("26");
   const ownershipVerifier = new TwitterV2OwnershipVerifier(fifoQueue);
 
   try {
+    console.log("28");
     const twitterAccount = await ownershipVerifier.verify({
       twitterCode: requestData.twitterCode,
       callback: requestData.callback,
     });
+    console.log("32");
     const commitmentReceipt = await commitmentMapper.commit(
       twitterAccount.identifier,
       requestData.commitment

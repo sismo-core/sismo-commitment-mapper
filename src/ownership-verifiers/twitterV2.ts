@@ -53,11 +53,14 @@ export class TwitterV2OwnershipVerifier {
     twitterCode: string;
     callback: string;
   }): Promise<TwitterV2Account> {
+    console.log("verify twitter account", twitterCode, callback);
     const token = await this._requestAccessToken(twitterCode, callback);
+    console.log("token", token);
     await this._fifoQueue.add({
       twitterToken: { ...token, callback },
       failureCount: 0,
     });
+    console.log("added to queue;");
     return this._getTwitterAccount(callback);
   }
 
@@ -98,9 +101,32 @@ export class TwitterV2OwnershipVerifier {
     twitterCode: string,
     callback: string
   ): Promise<TwitterToken> {
-    const authClient = new auth.OAuth2User(this._getConfig(callback));
-    const res = await authClient.requestAccessToken(twitterCode as string);
-    return res.token as TwitterToken;
+    // console.log("this._getConfig(callback)", this._getConfig(callback));
+    console.log("callback", callback);
+    console.log("106", {
+      client_id: twitterClientId as string,
+      client_secret: twitterClientSecret as string,
+      callback,
+      scopes: TWITTER_SCOPES,
+    });
+    const authClient = new auth.OAuth2User({
+      client_id: twitterClientId as string,
+      client_secret: twitterClientSecret as string,
+      callback,
+      scopes: TWITTER_SCOPES,
+    });
+
+    // const authClient = new auth.OAuth2User(this._getConfig(callback));
+    console.log("authClient", authClient);
+    console.log("twitterCode", twitterCode);
+    try {
+      const res = await authClient.requestAccessToken(twitterCode as string);
+      console.log("res", res);
+      return res.token as TwitterToken;
+    } catch (e) {
+      console.log("e", e);
+    }
+    return "" as unknown as TwitterToken;
   }
 
   protected async _refreshAccessToken(
@@ -121,7 +147,10 @@ export class TwitterV2OwnershipVerifier {
   ): Promise<TwitterV2Account> {
     const authClient = new auth.OAuth2User(this._getConfig(callback));
     const client = new Client(authClient);
+    console.log("client", client);
+
     const me = await client.users.findMyUser();
+    console.log("me", me);
     const userId = me.data?.id;
     const username = me.data?.username;
     if (!userId) throw new Error("userId is undefined");
