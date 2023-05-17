@@ -93,17 +93,17 @@ test("should get a round robin access token from the queue", async () => {
 test("should be able to take only the good access token", async () => {
   await twitterV2OwnershipVerifierTest.verify({
     callback: "http://refresh_failure",
-    twitterCode: "test_twitter_code",
+    twitterCode: "test_twitter_code_failure",
   });
   await twitterV2OwnershipVerifierTest.verify({
     callback: "http://refresh_failure",
-    twitterCode: "test_twitter_code",
+    twitterCode: "test_twitter_code_failure",
   });
   await twitterV2OwnershipVerifierTest.verify({
     callback: "http://test",
     twitterCode: "test_twitter_code_ok",
   });
   expect(await twitterV2OwnershipVerifierTest.getAccessToken()).toEqual(
-    "test_twitter_code"
+    "test_twitter_code_ok"
   );
 });

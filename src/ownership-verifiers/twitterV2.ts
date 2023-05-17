@@ -5,10 +5,7 @@ import {
   OAuth2Scopes,
   OAuth2UserOptions,
 } from "twitter-api-sdk/dist/OAuth2User";
-
-import {
-  StatelessOAuth2User
-} from "../utils/stateless-oauth"
+import { StatelessOAuth2User } from "../utils/stateless-oauth";
 
 const twitterClientId = process.env.COMMITMENT_MAPPER_TWITTER_CLIENT_ID!;
 const twitterClientSecret =
@@ -89,7 +86,7 @@ export class TwitterV2OwnershipVerifier {
 
   async getAuthUrl(callback: string) {
     const authClient = new StatelessOAuth2User(this._getConfig(callback));
-    return authClient.generateStatelessAuthURL()
+    return authClient.generateStatelessAuthURL();
   }
 
   protected async _requestAccessToken(
@@ -97,7 +94,9 @@ export class TwitterV2OwnershipVerifier {
     callback: string
   ): Promise<TwitterToken> {
     const authClient = new StatelessOAuth2User(this._getConfig(callback));
-    const res = await authClient.requestStatelessAccessToken(twitterCode as string);
+    const res = await authClient.requestStatelessAccessToken(
+      twitterCode as string
+    );
     return res.token as TwitterToken;
   }
 
