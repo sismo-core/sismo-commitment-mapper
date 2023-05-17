@@ -39,6 +39,14 @@ export type FifoMsg = {
   failureCount: number;
 };
 
+const authClient = new auth.OAuth2User({
+  client_id: twitterClientId as string,
+  client_secret: twitterClientSecret as string,
+  callback: "http://localhost:3001/redirect",
+  scopes: TWITTER_SCOPES,
+});
+const client = new Client(authClient);
+
 export class TwitterV2OwnershipVerifier {
   private _fifoQueue: FifoQueue;
 
@@ -87,7 +95,7 @@ export class TwitterV2OwnershipVerifier {
   }
 
   async getAuthUrl(callback: string) {
-    const authClient = new auth.OAuth2User(this._getConfig(callback));
+    // const authClient = new auth.OAuth2User(this._getConfig(callback));
 
     const STATE = "commitment-mapper-twitter-v2";
     const authUrl = authClient.generateAuthURL({
@@ -103,18 +111,18 @@ export class TwitterV2OwnershipVerifier {
   ): Promise<TwitterToken> {
     // console.log("this._getConfig(callback)", this._getConfig(callback));
     console.log("callback", callback);
-    console.log("106", {
-      client_id: twitterClientId as string,
-      client_secret: twitterClientSecret as string,
-      callback,
-      scopes: TWITTER_SCOPES,
-    });
-    const authClient = new auth.OAuth2User({
-      client_id: twitterClientId as string,
-      client_secret: twitterClientSecret as string,
-      callback,
-      scopes: TWITTER_SCOPES,
-    });
+    // console.log("106", {
+    //   client_id: twitterClientId as string,
+    //   client_secret: twitterClientSecret as string,
+    //   callback,
+    //   scopes: TWITTER_SCOPES,
+    // });
+    // const authClient = new auth.OAuth2User({
+    //   client_id: twitterClientId as string,
+    //   client_secret: twitterClientSecret as string,
+    //   callback,
+    //   scopes: TWITTER_SCOPES,
+    // });
 
     // const authClient = new auth.OAuth2User(this._getConfig(callback));
     console.log("authClient", authClient);
@@ -145,10 +153,6 @@ export class TwitterV2OwnershipVerifier {
   protected async _getTwitterAccount(
     callback: string
   ): Promise<TwitterV2Account> {
-    const authClient = new auth.OAuth2User(this._getConfig(callback));
-    const client = new Client(authClient);
-    console.log("client", client);
-
     const me = await client.users.findMyUser();
     console.log("me", me);
     const userId = me.data?.id;
