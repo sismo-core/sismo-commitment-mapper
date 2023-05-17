@@ -30,6 +30,21 @@ export class FifoQueueDynamodb implements FifoQueue {
     }
   }
 
+  async isEmpty(): Promise<boolean> {
+    return await this.length() == 0;
+  }
+
+  async length(): Promise<number> {
+    const params = {
+      TableName: this.tableName,
+      Select: "COUNT",
+    };
+    const res = await this.db.query(params).promise();
+    const length = res.Count || 0;
+    console.log("Queue length: ", length);
+    return length;
+  }
+
   async pop(): Promise<Msg> {
     const params = {
       TableName: this.tableName,

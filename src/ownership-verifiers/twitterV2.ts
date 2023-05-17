@@ -10,7 +10,7 @@ import { StatelessOAuth2User } from "../utils/stateless-oauth";
 const twitterClientId = process.env.COMMITMENT_MAPPER_TWITTER_CLIENT_ID!;
 const twitterClientSecret =
   process.env.COMMITMENT_MAPPER_TWITTER_CLIENT_SECRET!;
-const twitterRefreshTokenFailureThreshold = process.env
+export const twitterRefreshTokenFailureThreshold = process.env
   .COMMITMENT_MAPPER_TWITTER_REFRESH_FAILURE
   ? parseInt(process.env.COMMITMENT_MAPPER_TWITTER_REFRESH_FAILURE)
   : 10;
@@ -63,23 +63,28 @@ export class TwitterV2OwnershipVerifier {
   }
 
   async getAccessToken(): Promise<string> {
-    const tokenMsg = (await this._fifoQueue.pop()) as FifoMsg;
-    try {
-      tokenMsg.twitterToken = await this._refreshAccessToken(
-        tokenMsg.twitterToken
-      );
-    } catch {
-      tokenMsg.failureCount += 1;
-      console.log(
-        "failed to refresh token. failureCount: ",
-        tokenMsg.failureCount
-      );
-    } finally {
-      // After 10 failures, we give up and don't add it back to the queue
-      if (tokenMsg.failureCount < twitterRefreshTokenFailureThreshold) {
-        await this._fifoQueue.add(tokenMsg);
+    let isValidToken, tokenMsg;
+    do {
+      if (await this._fifoQueue.isEmpty()) {
+        throw new Error("No tokens in the pool");
       }
-    }
+      tokenMsg = (await this._fifoQueue.pop()) as FifoMsg;
+      isValidToken = true;
+      try {
+        tokenMsg.twitterToken = await this._refreshAccessToken(tokenMsg.twitterToken);
+      } catch {
+        isValidToken = false;
+        tokenMsg.failureCount += 1;
+        console.log(
+          "failed to refresh token. failureCount: ",
+          tokenMsg.failureCount
+        );
+      } finally {
+        if (tokenMsg.failureCount < twitterRefreshTokenFailureThreshold) {
+          await this._fifoQueue.add(tokenMsg);
+        }
+      }
+  } while (!isValidToken);
     console.log("return access token", tokenMsg.twitterToken);
     return tokenMsg.twitterToken.access_token;
   }

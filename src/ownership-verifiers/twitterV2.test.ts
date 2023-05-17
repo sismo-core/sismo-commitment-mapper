@@ -1,5 +1,6 @@
 import { FifoQueue, LocalFifoQueue } from "../fifo-queue";
 import {
+  twitterRefreshTokenFailureThreshold,
   TwitterToken,
   TwitterV2Account,
   TwitterV2OwnershipVerifier,
@@ -90,7 +91,7 @@ test("should get a round robin access token from the queue", async () => {
   );
 });
 
-test("should be able to take only the good access token", async () => {
+test("should get the first valid access token", async () => {
   await twitterV2OwnershipVerifierTest.verify({
     callback: "http://refresh_failure",
     twitterCode: "test_twitter_code_failure",
@@ -106,4 +107,38 @@ test("should be able to take only the good access token", async () => {
   expect(await twitterV2OwnershipVerifierTest.getAccessToken()).toEqual(
     "test_twitter_code_ok"
   );
+});
+
+test("should get valid tokens and remove failed ones when threshold is exceeded", async() => {
+  await twitterV2OwnershipVerifierTest.verify({
+    callback: "http://refresh_failure",
+    twitterCode: "test_twitter_code_failure",
+  });
+  await twitterV2OwnershipVerifierTest.verify({
+    callback: "http://test",
+    twitterCode: "test_twitter_code_ok",
+  });
+  for (let count = 1; count <= twitterRefreshTokenFailureThreshold; count++) {
+    expect(await fifoQueue.length()).toEqual(2);
+    expect(await twitterV2OwnershipVerifierTest.getAccessToken()).toEqual(
+      "test_twitter_code_ok"
+    );
+  }
+  expect(await fifoQueue.length()).toEqual(1);
+  expect(await twitterV2OwnershipVerifierTest.getAccessToken()).toEqual(
+    "test_twitter_code_ok"
+  );
+});
+
+test("should throw error when token queue is empty", async () => {
+  expect(await fifoQueue.isEmpty()).toBeTruthy()
+  await expect(twitterV2OwnershipVerifierTest.getAccessToken()).rejects.toThrowError("No tokens in the pool");
+});
+
+test("should throw error when token queue is empty after reaching max refresh threshold for all tokens", async() => {
+  await twitterV2OwnershipVerifierTest.verify({
+    callback: "http://refresh_failure",
+    twitterCode: "test_twitter_code_failure",
+  });
+  await expect(twitterV2OwnershipVerifierTest.getAccessToken()).rejects.toThrowError("No tokens in the pool");
 });
