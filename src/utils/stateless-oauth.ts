@@ -15,7 +15,7 @@ export class StatelessOAuth2User extends OAuth2User {
   }
   
   requestStatelessAccessToken(code?: string) {
-    this.generateStatelessAuthURL()
-    return this.requestAccessToken(code)
+    this.generateStatelessAuthURL();
+    return this.requestAccessToken(code);
   }
 }

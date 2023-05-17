@@ -12,6 +12,16 @@ export class LocalFifoQueue implements FifoQueue {
     console.log("add msg", msg);
   }
 
+  async isEmpty() {
+    return await this.length() == 0;
+  }
+
+  async length() {
+    const length = this._queue.length
+    console.log("Queue length: ", length);
+    return length;
+  }
+
   async pop() {
     const msg = this._queue.shift();
     console.log("get msg", msg);
