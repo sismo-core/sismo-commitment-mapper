@@ -76,3 +76,28 @@ export const getTwitterV2Token: Handler = async (
     };
   }
 };
+
+export const getTwitterV2Url: Handler = async (
+  event: APIGatewayEvent,
+  _context: Context
+): Promise<APIGatewayProxyResult> => {
+  const fifoQueue = fifoQueueFactory();
+  const ownershipVerifier = new TwitterV2OwnershipVerifier(fifoQueue);
+
+  try {
+    const authUrl = await ownershipVerifier.getAuthUrl(
+      "http://localhost:3001/redirect"
+    );
+    return {
+      statusCode: 200,
+      body: JSON.stringify(authUrl),
+    };
+  } catch (e: any) {
+    return {
+      statusCode: 500,
+      body: JSON.stringify({
+        error: e.message,
+      }),
+    };
+  }
+};

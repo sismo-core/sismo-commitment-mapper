@@ -106,6 +106,14 @@ functions:
           method: GET
     role: commitmentMapperRole
 
+  getTwitterV2Url:
+    handler: src/handlers/twitter-v2.getTwitterV2Url
+    events:
+      - httpApi:
+          path: /get-twitter-url
+          method: GET
+    role: commitmentMapperRole
+
   requestTwitterToken:
     handler: src/handler.requestTwitterToken
     disableLogs: true

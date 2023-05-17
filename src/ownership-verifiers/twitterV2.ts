@@ -83,6 +83,17 @@ export class TwitterV2OwnershipVerifier {
     return tokenMsg.twitterToken.access_token;
   }
 
+  async getAuthUrl(callback: string) {
+    const authClient = new auth.OAuth2User(this._getConfig(callback));
+
+    const STATE = "commitment-mapper-twitter-v2";
+    const authUrl = authClient.generateAuthURL({
+      state: STATE,
+      code_challenge_method: "s256",
+    });
+    return authUrl;
+  }
+
   protected async _requestAccessToken(
     twitterCode: string,
     callback: string
@@ -134,10 +145,3 @@ export class TwitterV2OwnershipVerifier {
     };
   }
 }
-
-// const STATE = "commitment-mapper-twitter-v2";
-// const authUrl = authClient.generateAuthURL({
-//   state: STATE,
-//   code_challenge_method: "s256",
-// });
-// //

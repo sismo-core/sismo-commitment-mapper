@@ -268,6 +268,13 @@ curl https://x5y521b36b.execute-api.eu-west-1.amazonaws.com/sismo-address-commit
 - prod-beta: https://x93oogcd5e.execute-api.eu-west-1.amazonaws.com
 - dev-beta: https://btwu3bqo4a.execute-api.eu-west-1.amazonaws.com
 
+## Dev environment 
+
+Launch the commitment mapper in dev
+```bash
+yarn dev
+```
+
 ## License
 
 Distributed under the MIT License.
