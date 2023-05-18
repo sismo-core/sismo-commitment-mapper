@@ -1,14 +1,12 @@
 import { DynamoDB } from "aws-sdk";
 import { Msg, FifoQueue } from "./fifo-queue";
 
-export class FifoQueueDynamodb implements FifoQueue {
-  private db: DynamoDB.DocumentClient;
+export class FifoQueueDynamoDB implements FifoQueue {
+  private documentClient: DynamoDB.DocumentClient;
   private tableName: string;
 
-  constructor(tableName: string, region: string) {
-    this.db = new DynamoDB.DocumentClient({
-      region,
-    });
+  constructor(documentClient: DynamoDB.DocumentClient, tableName: string) {
+    this.documentClient = documentClient;
     this.tableName = tableName;
   }
 
@@ -23,7 +21,7 @@ export class FifoQueueDynamodb implements FifoQueue {
     };
 
     try {
-      await this.db.put(params).promise();
+      await this.documentClient.put(params).promise();
       console.log("add msg", msg);
     } catch (err) {
       console.error("Unable to add message: ", err);
@@ -39,7 +37,7 @@ export class FifoQueueDynamodb implements FifoQueue {
       TableName: this.tableName,
       Select: "COUNT",
     };
-    const res = await this.db.query(params).promise();
+    const res = await this.documentClient.scan(params).promise();
     const length = res.Count || 0;
     console.log("Queue length: ", length);
     return length;
@@ -55,7 +53,7 @@ export class FifoQueueDynamodb implements FifoQueue {
     };
 
     try {
-      const data = await this.db.query(params).promise();
+      const data = await this.documentClient.query(params).promise();
       if (data.Items && data.Items.length > 0) {
         const msg = data.Items[0].msg;
         console.log("get msg", msg);
@@ -64,7 +62,7 @@ export class FifoQueueDynamodb implements FifoQueue {
           TableName: this.tableName,
           Key: { pk: "FIFO_QUEUE", timestamp: data.Items[0].timestamp },
         };
-        await this.db.delete(deleteParams).promise();
+        await this.documentClient.delete(deleteParams).promise();
 
         return msg;
       } else {
