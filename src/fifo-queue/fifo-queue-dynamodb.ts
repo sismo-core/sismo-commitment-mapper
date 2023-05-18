@@ -3,7 +3,7 @@ import { Msg, FifoQueue } from "./fifo-queue";
 
 const dynamoDBConfig = {
   endpoint: 'http://localhost:9000',
-  region: 'us-west-2', 
+  region: 'eu-west-1', 
   accessKeyId: 'test', 
   secretAccessKey: 'test',
 };
