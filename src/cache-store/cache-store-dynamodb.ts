@@ -3,14 +3,12 @@ import { DynamoDB } from "aws-sdk";
 import { CacheStore, Key, Value } from "./cache-store";
 
 export class CacheStoreDynamodb implements CacheStore {
-  private _tableName: string;
   private _documentClient: DynamoDB.DocumentClient;
+  private _tableName: string;
 
-  constructor(tableName: string, region: string) {
+  constructor(documentClient: DynamoDB.DocumentClient, tableName: string) {
+    this._documentClient = documentClient;
     this._tableName = tableName;
-    this._documentClient = new DynamoDB.DocumentClient({
-      region: region,
-    });
   }
 
   async add(key: Key, value: Value, duration: number): Promise<void> {

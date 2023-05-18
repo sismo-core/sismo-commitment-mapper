@@ -1,7 +1,8 @@
 export * from "./fifo-queue";
 export * from "./fifo-queue-dynamodb";
 export * from "./fifo-queue-local";
-import { FifoQueueDynamodb } from "./fifo-queue-dynamodb";
+import { DynamoDB } from "aws-sdk";
+import { FifoQueueDynamoDB } from "./fifo-queue-dynamodb";
 import { LocalFifoQueue } from "./fifo-queue-local";
 
 let offlineLocalFifoQueueSingleton: any = null;
@@ -11,9 +12,11 @@ const getDynamoDBFifoQueueInstance = () => {
   if (!env.FIFO_QUEUE_REGION || !env.FIFO_QUEUE_TABLE_NAME) {
     throw "FIFO_QUEUE_REGION and FIFO_QUEUE_TABLE_NAME env vars must be set";
   }
-  return new FifoQueueDynamodb(
-    env.FIFO_QUEUE_TABLE_NAME,
-    env.FIFO_QUEUE_REGION
+  return new FifoQueueDynamoDB(
+    new DynamoDB.DocumentClient({
+      region: env.FIFO_QUEUE_REGION
+    }),
+    env.FIFO_QUEUE_TABLE_NAME
   );
 };
 

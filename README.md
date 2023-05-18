@@ -270,9 +270,19 @@ curl https://x5y521b36b.execute-api.eu-west-1.amazonaws.com/sismo-address-commit
 
 ## Dev environment 
 
-Launch the commitment mapper in dev
+### Running the commitment mapper locally
+Launch in dev mode on staging environment.
 ```bash
+source .env.staging-beta.sh
 yarn dev
+```
+
+### Executing the tests
+
+Running the docker container is required for a few tests to pass.
+```bash
+docker-compose -f docker-compose.test.yaml up
+npx jest
 ```
 
 ## License
