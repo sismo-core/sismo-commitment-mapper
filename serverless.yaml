@@ -165,6 +165,21 @@ plugins:
 
 resources:
   Resources:
+    fifoStore:
+      Type: AWS::DynamoDB::Table
+      DeletionPolicy: Retain
+      Properties:
+        TableName: fifo-store-${sls:stage}
+        AttributeDefinitions:
+        - AttributeName: pk
+          AttributeType: S
+        - AttributeName: timestamp
+          AttributeType: N
+        KeySchema:
+        - AttributeName: pk
+          KeyType: HASH
+        - AttributeName: timestamp
+          KeyType: SORT
     cacheStore:
       Type: AWS::DynamoDB::Table
       DeletionPolicy: Retain
@@ -219,6 +234,19 @@ resources:
                     - sts:AssumeRole
                   Resource:
                     - ${self:custom.commitmentMapperDynamoDB.${sls:stage}.role}
+          - PolicyName: FifoStoreAccess
+            PolicyDocument:
+              Version: "2012-10-17"
+              Statement:
+                - Effect: Allow
+                  Action:
+                    - dynamodb:DescribeTable
+                    - dynamodb:Query
+                    - dynamodb:Scan
+                    - dynamodb:GetItem
+                    - dynamodb:PutItem
+                  Resource:
+                    - "Fn::GetAtt": [fifoStore, Arn]
           - PolicyName: CacheStoreAccess
             PolicyDocument:
               Version: "2012-10-17"
