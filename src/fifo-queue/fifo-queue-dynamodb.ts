@@ -1,14 +1,19 @@
 import { DynamoDB } from "aws-sdk";
 import { Msg, FifoQueue } from "./fifo-queue";
 
+const dynamoDBConfig = {
+  endpoint: 'http://localhost:9000',
+  region: 'us-west-2', 
+  accessKeyId: 'test', 
+  secretAccessKey: 'test',
+};
+
 export class FifoQueueDynamodb implements FifoQueue {
   private db: DynamoDB.DocumentClient;
   private tableName: string;
 
   constructor(tableName: string, region: string) {
-    this.db = new DynamoDB.DocumentClient({
-      region,
-    });
+    this.db = new DynamoDB.DocumentClient(dynamoDBConfig);
     this.tableName = tableName;
   }
 
