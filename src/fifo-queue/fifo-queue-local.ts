@@ -9,7 +9,6 @@ export class LocalFifoQueue implements FifoQueue {
 
   async add(msg: Msg) {
     this._queue.push(msg);
-    console.log("add msg", msg);
   }
 
   async isEmpty() {
@@ -17,14 +16,11 @@ export class LocalFifoQueue implements FifoQueue {
   }
 
   async length() {
-    const length = this._queue.length
-    console.log("Queue length: ", length);
-    return length;
+    return this._queue.length;
   }
 
   async pop() {
     const msg = this._queue.shift();
-    console.log("get msg", msg);
     if (!msg) {
       throw new Error("No msg available in the queue");
     }
