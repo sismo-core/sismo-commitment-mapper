@@ -59,7 +59,7 @@ export class TwitterV2OwnershipVerifier {
       twitterToken: { ...token, callback },
       failureCount: 0,
     });
-    return this._getTwitterAccount(callback);
+    return this._getTwitterAccount(callback, token);
   }
 
   async getAccessToken(): Promise<string> {
@@ -114,9 +114,13 @@ export class TwitterV2OwnershipVerifier {
   }
 
   protected async _getTwitterAccount(
-    callback: string
+    callback: string,
+    token: TwitterToken
   ): Promise<TwitterV2Account> {
-    const authClient = new auth.OAuth2User(this._getConfig(callback));
+    const authClient = new auth.OAuth2User({
+      ...this._getConfig(callback),
+      token
+    });
     const client = new Client(authClient);
     const me = await client.users.findMyUser();
     const userId = me.data?.id;
