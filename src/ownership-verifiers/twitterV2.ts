@@ -75,17 +75,12 @@ export class TwitterV2OwnershipVerifier {
       } catch {
         isValidToken = false;
         tokenMsg.failureCount += 1;
-        console.log(
-          "failed to refresh token. failureCount: ",
-          tokenMsg.failureCount
-        );
       } finally {
         if (tokenMsg.failureCount < twitterRefreshTokenFailureThreshold) {
           await this._fifoQueue.add(tokenMsg);
         }
       }
   } while (!isValidToken);
-    console.log("return access token", tokenMsg.twitterToken);
     return tokenMsg.twitterToken.access_token;
   }
 

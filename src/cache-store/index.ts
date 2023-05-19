@@ -25,9 +25,7 @@ export const getCacheStore = () => {
   if(process.env.IS_OFFLINE === 'true') {
     if(!offlineModeLocalCacheStoreSingleton) {
       offlineModeLocalCacheStoreSingleton = new CacheStoreLocal();
-      console.log('new cache store');
     }
-    console.log('use cache store');
     return offlineModeLocalCacheStoreSingleton;
   }
 

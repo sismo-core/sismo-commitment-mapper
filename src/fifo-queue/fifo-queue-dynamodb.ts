@@ -22,7 +22,6 @@ export class FifoQueueDynamoDB implements FifoQueue {
 
     try {
       await this.documentClient.put(params).promise();
-      console.log("add msg", msg);
     } catch (err) {
       console.error("Unable to add message: ", err);
     }
@@ -46,7 +45,6 @@ export class FifoQueueDynamoDB implements FifoQueue {
     };
     const data = await this.documentClient.scan(params).promise();
     const length = data.Count || 0;
-    console.log("Queue length: ", length);
     return length;
   }
 
@@ -63,14 +61,11 @@ export class FifoQueueDynamoDB implements FifoQueue {
       const data = await this.documentClient.query(params).promise();
       if (data.Items && data.Items.length > 0) {
         const msg = data.Items[0].msg;
-        console.log("get msg", msg);
-
         const deleteParams = {
           TableName: this.tableName,
           Key: { pk: "FIFO_QUEUE", timestamp: data.Items[0].timestamp },
         };
         await this.documentClient.delete(deleteParams).promise();
-
         return msg;
       } else {
         throw new Error("No msg available in the queue");
