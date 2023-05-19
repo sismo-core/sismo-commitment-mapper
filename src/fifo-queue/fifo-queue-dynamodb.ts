@@ -29,7 +29,14 @@ export class FifoQueueDynamoDB implements FifoQueue {
   }
 
   async isEmpty(): Promise<boolean> {
-    return await this.length() == 0;
+    const params = {
+      TableName: this.tableName,
+      KeyConditionExpression: "pk = :pk",
+      ExpressionAttributeValues: { ":pk": "FIFO_QUEUE" },
+      Limit: 1,
+    };
+    const data = await this.documentClient.query(params).promise();
+    return !(data.Items && data.Items.length > 0);
   }
 
   async length(): Promise<number> {
@@ -37,8 +44,8 @@ export class FifoQueueDynamoDB implements FifoQueue {
       TableName: this.tableName,
       Select: "COUNT",
     };
-    const res = await this.documentClient.scan(params).promise();
-    const length = res.Count || 0;
+    const data = await this.documentClient.scan(params).promise();
+    const length = data.Count || 0;
     console.log("Queue length: ", length);
     return length;
   }
