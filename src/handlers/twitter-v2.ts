@@ -14,6 +14,10 @@ type CommitTwitterV2EddsaInputData = {
   commitment: string;
 };
 
+type TwitterGetTokenInputData = {
+  oauth_callback?: string;
+};
+
 export const commitTwitterV2Eddsa: Handler = async (
   event: APIGatewayEvent,
   _context: Context
@@ -83,14 +87,18 @@ export const getTwitterV2Url: Handler = async (
 ): Promise<APIGatewayProxyResult> => {
   const fifoQueue = fifoQueueFactory();
   const ownershipVerifier = new TwitterV2OwnershipVerifier(fifoQueue);
-
+  const queryParams: TwitterGetTokenInputData = event.queryStringParameters!;
+  if (!queryParams.oauth_callback) {
+    throw new Error("You should provide an oauth_callback");
+  }
   try {
-    const authUrl = await ownershipVerifier.getAuthUrl(
-      "http://localhost:3001/redirect"
-    );
+    const authUrl = await ownershipVerifier.getAuthUrl(queryParams.oauth_callback);
     return {
-      statusCode: 200,
-      body: JSON.stringify(authUrl),
+      statusCode: 302,
+      headers: {
+        Location: authUrl,
+      },
+      body: "",
     };
   } catch (e: any) {
     return {
