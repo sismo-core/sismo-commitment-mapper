@@ -252,6 +252,7 @@ resources:
                     - dynamodb:Scan
                     - dynamodb:GetItem
                     - dynamodb:PutItem
+                    - dynamodb:DeleteItem
                   Resource:
                     - "Fn::GetAtt": [fifoQueue, Arn]
           - PolicyName: CacheStoreAccess
