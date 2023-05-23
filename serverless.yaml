@@ -52,6 +52,7 @@ provider:
     COMMITMENT_STORE_TABLE_SUFFIX: ${self:custom.commitmentMapperDynamoDB.${sls:stage}.tableNameSuffix}
     COMMITMENT_STORE_REGION: ${self:custom.commitmentMapperDynamoDB.${sls:stage}.region}
     COMMITMENT_STORE_ROLE_ARN: ${self:custom.commitmentMapperDynamoDB.${sls:stage}.role}
+    COMMITMENT_MAPPER_ACCESS_TOKEN: ${env:COMMITMENT_MAPPER_ACCESS_TOKEN}
     COMMITMENT_MAPPER_GITHUB_OAUTH_ID: ${env:COMMITMENT_MAPPER_GITHUB_OAUTH_ID}
     COMMITMENT_MAPPER_GITHUB_OAUTH_SECRET: ${env:COMMITMENT_MAPPER_GITHUB_OAUTH_SECRET}
     COMMITMENT_MAPPER_TWITTER_CONSUMER_KEY: ${env:COMMITMENT_MAPPER_TWITTER_CONSUMER_KEY}
@@ -106,7 +107,7 @@ functions:
     handler: src/handlers/twitter-v2.getTwitterV2Token
     events:
       - httpApi:
-          path: /get-twitter-access-token
+          path: /get-twitter-v2-access-token
           method: GET
     role: commitmentMapperRole
 
@@ -114,7 +115,7 @@ functions:
     handler: src/handlers/twitter-v2.getTwitterV2Url
     events:
       - httpApi:
-          path: /get-twitter-url
+          path: /get-twitter-v2-url
           method: GET
     role: commitmentMapperRole
 

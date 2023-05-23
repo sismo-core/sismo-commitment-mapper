@@ -18,6 +18,10 @@ type TwitterGetTokenInputData = {
   oauth_callback?: string;
 };
 
+function isAuthorized(event: APIGatewayEvent): boolean {
+  return event.headers.authorization === `Bearer ${process.env.COMMITMENT_MAPPER_ACCESS_TOKEN}`;
+}
+
 export const commitTwitterV2Eddsa: Handler = async (
   event: APIGatewayEvent,
   _context: Context
@@ -59,6 +63,13 @@ export const getTwitterV2Token: Handler = async (
   event: APIGatewayEvent,
   _context: Context
 ): Promise<APIGatewayProxyResult> => {
+  if (!isAuthorized(event)) {
+    return {
+      statusCode: 401,
+      body: "",
+    };
+  }
+
   const fifoQueue = fifoQueueFactory();
   const ownershipVerifier = new TwitterV2OwnershipVerifier(fifoQueue);
 
