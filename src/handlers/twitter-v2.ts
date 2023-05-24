@@ -19,7 +19,7 @@ type TwitterGetTokenInputData = {
 };
 
 function isAuthorized(event: APIGatewayEvent): boolean {
-  return event.headers.authorization === `Bearer ${process.env.COMMITMENT_MAPPER_ACCESS_TOKEN}`;
+  return event.headers.authorization === `Bearer ${process.env.COMMITMENT_MAPPER_BEARER_TOKEN}`;
 }
 
 export const commitTwitterV2Eddsa: Handler = async (
@@ -66,7 +66,7 @@ export const getTwitterV2Token: Handler = async (
   if (!isAuthorized(event)) {
     return {
       statusCode: 401,
-      body: "",
+      body: "Unauthorized: Access Denied",
     };
   }
 
