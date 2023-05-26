@@ -25,6 +25,7 @@ export const TWITTER_SCOPES: OAuth2Scopes[] = [
   "tweet.read",
   "users.read",
   "offline.access",
+  "follows.read"
 ];
 
 export type TwitterToken = {
