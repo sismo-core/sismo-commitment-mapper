@@ -55,6 +55,7 @@ provider:
     COMMITMENT_MAPPER_BEARER_TOKEN: ${env:COMMITMENT_MAPPER_BEARER_TOKEN}
     COMMITMENT_MAPPER_GITHUB_OAUTH_ID: ${env:COMMITMENT_MAPPER_GITHUB_OAUTH_ID}
     COMMITMENT_MAPPER_GITHUB_OAUTH_SECRET: ${env:COMMITMENT_MAPPER_GITHUB_OAUTH_SECRET}
+    COMMITMENT_MAPPER_TELEGRAM_BOT_ACCESS_TOKEN: ${env:COMMITMENT_MAPPER_TELEGRAM_BOT_ACCESS_TOKEN}
     COMMITMENT_MAPPER_TWITTER_CONSUMER_KEY: ${env:COMMITMENT_MAPPER_TWITTER_CONSUMER_KEY}
     COMMITMENT_MAPPER_TWITTER_CONSUMER_SECRET: ${env:COMMITMENT_MAPPER_TWITTER_CONSUMER_SECRET}
     COMMITMENT_MAPPER_TWITTER_CLIENT_ID: ${env:COMMITMENT_MAPPER_TWITTER_CLIENT_ID}
@@ -80,6 +81,16 @@ functions:
     events:
       - httpApi:
           path: /commit-github-eddsa
+          method: POST
+    role: commitmentMapperRole
+
+  commitTelegramEddsa:
+    handler: src/handlers/telegram.commitTelegramEddsa
+    provisionedConcurrency: 1
+    disableLogs: true
+    events:
+      - httpApi:
+          path: /commit-telegram-eddsa
           method: POST
     role: commitmentMapperRole
 
