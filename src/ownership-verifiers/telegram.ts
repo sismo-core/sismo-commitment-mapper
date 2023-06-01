@@ -1,48 +1,52 @@
 import crypto from "crypto";
 import { utils } from "ethers";
 
-const telegramBotToken = process.env.COMMITMENT_MAPPER_TELEGRAM_BOT_ACCESS_TOKEN!;
+const telegramBotToken = process.env.COMMITMENT_MAPPER_TELEGRAM_BOT_ACCESS_TOKEN!
 
-export type TelegramAccount = {
+type TelegramUser = {
   id: number;
-  identifier: string;
-  firstName: string;
-  lastName: string;
+  first_name?: string;
+  last_name?: string;
   username: string;
-  photoUrl: string;
-  authDate: number;
+  photo_url?: string;
+  auth_date?: number;
 };
 
-type TelegramPayload = TelegramAccount & {
+export type TelegramPayload = TelegramUser & {
   hash: string;
+};
+
+export type TelegramAccount = TelegramUser & {
+  identifier: string;
 };
 
 export class TelegramOwnershipVerifier {
 
   async verify({ payload }: { payload: string }): Promise<TelegramAccount> {
     if (!payload) {
-      throw new Error("Payload should always be defined!");
+      throw new Error("Payload must not be empty");
     }
-    const telegramPayload: TelegramPayload = JSON.parse(atob(payload));
-    if (!this._checkHash(telegramPayload)) {
-      throw new Error("Hash check failed. Data is NOT from Telegram");
+    const data = this._decodePayload(payload);
+    if (!this._checkHash(data)) {
+      throw new Error("Hash check failed, data is not from Telegram");
     }
-    const userId = telegramPayload.id;    
-    if (!userId) { 
-      throw new Error("Cannot store commitment without user ID");
+    const userId = data.id;
+    const username = data.username;   
+    if (!userId || !username) { 
+      throw new Error("Payload must contain userId and username");
     }
     return {
       id: userId,
       identifier: `0x1003${utils.hexZeroPad(`0x${userId}`, 20).slice(6)}`,
-      firstName: telegramPayload.firstName,
-      lastName: telegramPayload.lastName,
-      username: telegramPayload.username,
-      photoUrl: telegramPayload.photoUrl,
-      authDate: telegramPayload.authDate
+      first_name: data.first_name,
+      last_name: data.last_name,
+      username: username,
+      photo_url: data.photo_url,
+      auth_date: data.auth_date
     };
   }
 
-  private _checkHash(payload: TelegramPayload): boolean {
+  protected _checkHash(payload: TelegramPayload): boolean {
     if (!payload.hash) {
       throw new Error("Payload must contain hash");
     }
@@ -51,8 +55,20 @@ export class TelegramOwnershipVerifier {
       .map(([key, value]) => `${key}=${value}`)
       .sort()
       .join('\n');
-    const secretKey = crypto.createHash("sha256").update(telegramBotToken).digest();  
+    const secretKey = crypto.createHash("sha256").update(this._getTelegramBotToken()).digest();  
     const hash = crypto.createHmac("sha256", secretKey).update(checkString).digest("hex");
     return hash === payload.hash;
+  }
+
+  protected _decodePayload(payload: string): TelegramPayload {
+    try {
+      return JSON.parse(atob(payload));
+    } catch (err) {
+      throw new Error("Payload is not a valid JSON");
+    }
+  }
+
+  protected _getTelegramBotToken(): string {
+    return telegramBotToken;
   }
 }
