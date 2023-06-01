@@ -63,8 +63,9 @@ export class TelegramOwnershipVerifier {
   protected _decodePayload(payload: string): TelegramPayload {
     try {
       return JSON.parse(atob(payload));
-    } catch (err) {
-      throw new Error("Payload is not a valid JSON");
+    } catch (error) {
+      const errorMessage = (error instanceof Error) ? error.message : String(error);
+      throw new Error(`Error decoding payload: ${errorMessage}`);
     }
   }
 

@@ -23,7 +23,7 @@ test("should throw error when payload is not a valid JSON", async() => {
   const verifier = new TelegramOwnershipVerifierWithToken();
 
   await expect(verifier.verify({ payload: "test" }))
-    .rejects.toThrowError("Payload is not a valid JSON");
+    .rejects.toThrowError(/Error decoding payload/);
 });
 
 test("should throw error when payload does not contain hash", async() => {
